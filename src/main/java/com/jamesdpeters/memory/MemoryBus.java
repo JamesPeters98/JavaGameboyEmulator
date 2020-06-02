@@ -7,7 +7,7 @@ public class MemoryBus {
     public enum Bank {
         ROM(0x00, 0x7FFF),
         WORKING_RAM(0xC000, 0xDFFF),
-        TILE_RAM(0x8000,0x97FF),
+        TILE_RAM(0x8000,0x97FF, GetterSetter.VRAM),
         BACKGROUND_MAP(0x9800,0x9FFF),
         IO_REGISTERS(0xFF00, 0xFF7F),
         HIGH_RAM(0xFF80, 0xFFFE),
@@ -15,11 +15,17 @@ public class MemoryBus {
 
         private byte[] memory;
         private final int startAddress, endAddress;
-        Bank(int startAddress, int endAddress){
+        private GetterSetter getterSetter;
+        Bank(int startAddress, int endAddress, GetterSetter getterSetter){
             this.startAddress = startAddress;
             this.endAddress = endAddress;
+            this.getterSetter = getterSetter;
             memory = new byte[endAddress-startAddress+1];
             System.out.println("Creating new Memory: "+toString()+" of size: "+memory.length+" bytes");
+        }
+
+        Bank(int startAddress, int endAddress){
+            this(startAddress,endAddress,GetterSetter.DEFAULT);
         }
 
         boolean inRange(int address){
@@ -27,11 +33,15 @@ public class MemoryBus {
         }
 
         byte get(int address){
-            return memory[address-startAddress];
+            return getterSetter.get(this, index(address));
         }
 
         void set(int address, byte value){
-            memory[address-startAddress] = value;
+            getterSetter.set(this, index(address), value);
+        }
+
+        int index(int address){
+            return address-startAddress;
         }
 
         byte[] toArray(){
@@ -40,6 +50,13 @@ public class MemoryBus {
 
         void setMemory(byte[] memory){
             this.memory = memory;
+        }
+
+        byte getDirectByte(int address){
+            return memory[address];
+        }
+        void setDirectByte(int address, byte value){
+            memory[address] = value;
         }
 
         /*

@@ -1,6 +1,8 @@
 package com.jamesdpeters.cpu;
 
 import com.jamesdpeters.BootRom;
+import com.jamesdpeters.GameBoy;
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.cartridge.Cart;
 import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
@@ -13,6 +15,10 @@ public class CPU {
         HALT
     }
 
+    public final static int CPUCYCLE_1 = 4;
+    public final static int CPUCYCLE_2 = 8;
+    public final static int CPUCYCLE_3 = 12;
+    public final static int CPUCYCLE_4 = 16;
 
     //VARS
     Registers registers;
@@ -31,19 +37,25 @@ public class CPU {
         System.out.println(registers);
     }
 
-    public void step(){
-        if(state == State.HALT) return;
+    public int step(){
+        if(state == State.HALT) return 0;
         if(state == State.RUNNING) {
             try {
                 byte instructionByte = memory.getByte(registers.pc);
                 Instruction instruction = InstructionBuilder.fromByteNotPrefixed(instructionByte);
-                instruction.run(this);
-                System.out.println(registers);
+                int cycle = instruction.run(this);
+                getRegisters().totalCycles += cycle;
+                if(GameBoy.VERBOSE) {
+                    System.out.println(" Code:"+Utils.byteToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
+                    System.out.print(registers);
+                }
+                return cycle;
             } catch (UnknownInstructionException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
+        return 0;
     }
 
     public Registers getRegisters() {
@@ -65,10 +77,11 @@ public class CPU {
 
     public int readNextD16(){
         getRegisters().pc++;
-        byte lsb = getMemory().getByte(getRegisters().pc);
+        int lsb = getMemory().getByte(getRegisters().pc) & 0xFF;
         getRegisters().pc++;
-        byte msb = getMemory().getByte(getRegisters().pc);
-        return ((msb & 0xFF) << 8) | (lsb & 0xFF);
+        int msb = getMemory().getByte(getRegisters().pc);
+        int result = msb << 8 | lsb;
+        return result;
     }
 
     public byte readCurrentByte(){
@@ -81,10 +94,15 @@ public class CPU {
 
     public void setInitialConditions(){
         getRegisters().setAF(0x01b0);
-        getRegisters().setBC(0x0013);
+        getRegisters().setBC(0x000D);
         getRegisters().setDE(0x00D8);
         getRegisters().setHL(0x014D);
         getRegisters().sp = (short) 0xFFFE;
+
+//        getRegisters().getF().ZERO = true;
+//        getRegisters().getF().SUBTRACT = false;
+//        getRegisters().getF().HALF_CARRY = true;
+//        getRegisters().getF().CARRY = true;
 
         getMemory().writeByte(0xFF05, (byte) 0x00);
         getMemory().writeByte(0xFF06, (byte) 0x00);

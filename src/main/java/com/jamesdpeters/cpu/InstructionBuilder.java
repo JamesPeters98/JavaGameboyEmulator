@@ -8,10 +8,10 @@ import com.jamesdpeters.exceptions.UnknownInstructionException;
 
 public class InstructionBuilder {
     public static Instruction fromByteNotPrefixed(byte byte_) throws UnknownInstructionException {
-        System.out.println("Current instruction: "+ Utils.byteToString(byte_));
         int b = byte_ & 0xFF;
         if(b == 0x00) return Instruction.NOP;
         if(b == 0x76) return Instruction.HALT;
+        if(b == 0xf3) return Instruction.DI;
 
         //OPERATIONS AND BITWISE
         if(inHorizontalRange(b,  0x80,  0x87)) return horizontalLoadType(Instruction.ADD,  0x80, b, RegisterBank.A);
@@ -19,6 +19,7 @@ public class InstructionBuilder {
         if(inHorizontalRange(b,  0xA0,  0xA7)) return horizontalLoadType(Instruction.AND,  0xA0, b, RegisterBank.A);
         if(inHorizontalRange(b,  0xB0,  0xB7)) return horizontalLoadType(Instruction.OR,  0xB0, b, RegisterBank.A);
         if(inHorizontalRange(b,  0xA8, 0xAF)) return horizontalLoadType(Instruction.XOR, 0xA8, b, RegisterBank.A);
+        if(inHorizontalRange(b,  0xB8, 0xBF)) return horizontalLoadType(Instruction.CP, 0xB8, b, RegisterBank.A);
 
         //INCREMENTS
         if(inVerticalRange(b,  0x0C,  0x3C)) return verticalTargetCELA(Instruction.INC,  0x0C, b);
@@ -70,7 +71,11 @@ public class InstructionBuilder {
         if(inVerticalRange(b, 0x06,  0x36)) return verticalTargetBDHHL(Instruction.LD,  0x06, b, RegisterBank.D8);
 
         //LDH
-        if(b == 0xe0) return Instruction.LDH.setLoadType(null, RegisterBank.A);
+        if(b == 0xe0) return Instruction.LDH.setLoadType(RegisterBank.A, RegisterBank.A8);
+        if(b == 0xf0) return Instruction.LDH.setLoadType(RegisterBank.A8, RegisterBank.A);
+
+        //CP
+        if(b == 0xfe) return Instruction.CP.setLoadType(RegisterBank.D8,RegisterBank.A);
 
 
         //Rotate Operations
@@ -78,6 +83,7 @@ public class InstructionBuilder {
         if(b == 0x1f) return Instruction.RR.setLoadType(null, RegisterBank.A);
 
         //No instruction
+        System.out.println();
         throw new UnknownInstructionException(b);
     }
 
@@ -126,10 +132,10 @@ public class InstructionBuilder {
     private static Instruction verticalLoadType(int start, int value, RegisterBank source) throws UnknownInstructionException {
         int offset = value - start;
         switch (offset){
-            case 0: return Instruction.LD.setLoadType(source,RegisterBank.BC);
-            case 0x10: return Instruction.LD.setLoadType(source,RegisterBank.DE);
-            case 0x20: return Instruction.LD.setLoadType(source,RegisterBank.HL);
-            case 0x30: return Instruction.LD.setLoadType(source,RegisterBank.SP);
+            case 0: return Instruction.LD_16.setLoadType(source,RegisterBank.BC);
+            case 0x10: return Instruction.LD_16.setLoadType(source,RegisterBank.DE);
+            case 0x20: return Instruction.LD_16.setLoadType(source,RegisterBank.HL);
+            case 0x30: return Instruction.LD_16.setLoadType(source,RegisterBank.SP);
         }
         throw new UnknownInstructionException(value);
     }

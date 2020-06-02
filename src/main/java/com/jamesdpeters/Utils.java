@@ -7,7 +7,7 @@ public class Utils {
     }
 
     public static String intToString(int b){
-        return "0x"+Integer.toHexString(b & 0xFF);
+        return "0x"+Integer.toHexString(b & 0xFFFF);
     }
 
     public static char getHexChar(int b, int pos){

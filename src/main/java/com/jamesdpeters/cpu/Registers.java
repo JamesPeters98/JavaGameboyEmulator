@@ -9,6 +9,10 @@ public class Registers {
     public short sp; //Stack pointer
     public short pc; //Program counter/pointer
     FlagsRegister f = new FlagsRegister();
+    public int IME = 0;
+
+    //Other info
+    public int totalCycles = 0;
 
     public int getA() {
         return a;
@@ -112,7 +116,7 @@ public class Registers {
 
     @Override
     public String toString() {
-        return String.format("A=0x%08X, B=0x%08X, C=0x%08X, D=0x%08X, E=0x%08X, H=0x%08X, L=0x%08X, HL=0x%08X, PC=0x%08X, %s", getA(), getB(), getC(), getD(), getE(), getH(), getL(), getHL(), pc, f.toString());
+        return String.format("A=0x%04X, B=0x%04X, C=0x%04X, D=0x%04X, E=0x%04X, H=0x%04X, L=0x%04X, HL=0x%08X, PC=0x%08X, %s, cycle:%d", getA(), getB(), getC(), getD(), getE(), getH(), getL(), getHL(), pc, f.toString(), totalCycles);
     }
 
 //    public Registers incrementBC(){
@@ -122,6 +126,11 @@ public class Registers {
 
     public Registers incrementHL(){
         setHL(getHL()+1);
+        return this;
+    }
+
+    public Registers decrementHL(){
+        setHL(getHL()-1);
         return this;
     }
 
