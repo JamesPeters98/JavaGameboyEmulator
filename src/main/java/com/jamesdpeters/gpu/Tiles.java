@@ -22,8 +22,7 @@ public class Tiles {
 
     public static void setTilePixel(int tileIndex, int rowIndex, int pixelIndex, PixelValue pixelValue){
         tiles[tileIndex][rowIndex][pixelIndex] = pixelValue;
-        System.out.println("Setting Tile "+tileIndex+" row:"+" pixel: "+pixelIndex+" to value: "+pixelValue);
-        System.exit(0);
+        //System.out.println("Setting Tile "+tileIndex+" row:"+" pixel: "+pixelIndex+" to value: "+pixelValue);
     }
 
 

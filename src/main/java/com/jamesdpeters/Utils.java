@@ -14,4 +14,25 @@ public class Utils {
         String hexByte = Utils.intToString(b);
         return hexByte.charAt(hexByte.length()-1-pos);
     }
+
+    public static int[] ByteToInt(byte[] bytes){
+        int[] ints = new int[bytes.length];
+        for (int i=0; i<bytes.length; i++){
+            ints[i] = bytes[i] & 0xff;
+        }
+        return ints;
+    }
+
+    public static byte[] IntToByte(int[] ints){
+        byte[] bytes = new byte[ints.length];
+        for (int i=0; i<ints.length; i++){
+            bytes[i] = (byte) ints[i];
+        }
+        return bytes;
+    }
+
+    public static int getBit(int byte_, int position)
+    {
+        return (byte_ >> position) & 1;
+    }
 }

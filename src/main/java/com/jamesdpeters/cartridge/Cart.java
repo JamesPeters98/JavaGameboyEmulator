@@ -1,5 +1,6 @@
 package com.jamesdpeters.cartridge;
 
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.memory.MemoryBus;
 
 import java.io.File;
@@ -20,16 +21,18 @@ public class Cart {
         try {
             File file = new File(classLoader.getResource(romName).getFile());
             byte[] rom = Files.readAllBytes(file.toPath());
-            this.rom = new MemoryBus(rom);
+            this.rom = new MemoryBus(Utils.ByteToInt(rom));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private String getTitle(){
-        byte[] title = this.rom.getBytes(MemoryBus.Bank.ROM,titleRange[0],titleRange[1]);
-        return new String(title, StandardCharsets.UTF_8);
+        int[] title = this.rom.getBytes(MemoryBus.Bank.ROM,titleRange[0],titleRange[1]);
+        return new String(Utils.IntToByte(title), StandardCharsets.UTF_8);
     }
+
+
 
 
 }

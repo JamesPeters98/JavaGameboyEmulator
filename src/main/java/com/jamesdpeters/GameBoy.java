@@ -25,7 +25,7 @@ public class GameBoy {
         cpu.getRegisters().totalCycles += 4;
         int steps =0;
         while(true) {
-            if(cpu.getRegisters().totalCycles >= 100000){
+            if(cpu.getRegisters().totalCycles >= 300000){
                 System.exit(0);
             }
 //            if(steps % 1000 == 0){

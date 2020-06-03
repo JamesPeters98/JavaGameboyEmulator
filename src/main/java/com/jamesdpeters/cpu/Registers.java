@@ -7,7 +7,7 @@ public class Registers {
     int a,b,c,d,e,h,l; //Registers
 
     public short sp; //Stack pointer
-    public short pc; //Program counter/pointer
+    public int pc; //Program counter/pointer
     FlagsRegister f = new FlagsRegister();
     public int IME = 0;
 
@@ -116,7 +116,7 @@ public class Registers {
 
     @Override
     public String toString() {
-        return String.format("A=0x%04X, B=0x%04X, C=0x%04X, D=0x%04X, E=0x%04X, H=0x%04X, L=0x%04X, HL=0x%08X, PC=0x%08X, %s, cycle:%d", getA(), getB(), getC(), getD(), getE(), getH(), getL(), getHL(), pc, f.toString(), totalCycles);
+        return String.format("A=0x%02X, B=0x%02X, C=0x%02X, D=0x%02X, E=0x%02X, H=0x%02X, L=0x%02X, HL=0x%04X, PC=0x%04X, SP=0x%04X, %s, cycle:%d", getA(), getB(), getC(), getD(), getE(), getH(), getL(), getHL(), pc, sp, f.toString(), totalCycles);
     }
 
 //    public Registers incrementBC(){

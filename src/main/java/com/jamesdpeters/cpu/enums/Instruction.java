@@ -1,5 +1,6 @@
 package com.jamesdpeters.cpu.enums;
 
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.CPU;
 import com.jamesdpeters.cpu.FlagsRegister;
 
@@ -49,7 +50,7 @@ public enum Instruction {
     LD_R16_A((cpu, instruction) -> {
         RegisterBank source = instruction.getLoadType().source;
         RegisterBank target = instruction.getLoadType().target;
-        int sourceVal = source.getValue(cpu);
+        int sourceVal = source.getValue(cpu) & 0xFF;
         target.setValue(cpu,sourceVal);
         instruction.setInstructionName("LD "+target.getId()+","+source.getId());
         cpu.getRegisters().pc++;
@@ -68,11 +69,12 @@ public enum Instruction {
         int b2 = instruction.getLoadType().source.getValue(cpu);
         int result = b1-b2;
         cpu.getRegisters().getF().ZERO = (result) == 0;
-        cpu.getRegisters().getF().SUBTRACT = false;
-        cpu.getRegisters().getF().CARRY = (result) > 0xff;
-        cpu.getRegisters().getF().HALF_CARRY = (b1 & 0xF) + (b2 & 0xF) > 0xF;
+        cpu.getRegisters().getF().SUBTRACT = true;
+        cpu.getRegisters().getF().CARRY = b2 > b1;
+        cpu.getRegisters().getF().HALF_CARRY = (0x0f & b2) > (0x0f & b1);
         instruction.setInstructionName("CP "+instruction.getLoadType().target.getId()+","+instruction.getLoadType().source.getId());
 
+        cpu.getRegisters().pc++;
         if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
         return CPU.CPUCYCLE_1;
     }),
@@ -134,6 +136,36 @@ public enum Instruction {
 //        return cpu.getRegisters().pc++;
 //    }),
 
+    SET((cpu, instruction) -> {
+        int bit = instruction.getBit();
+        RegisterBank source = instruction.getLoadType().source;
+        int b = source.getValue(cpu) | 1 << bit;
+        source.setValue(cpu,b);
+        cpu.getRegisters().pc++;
+        cpu.getRegisters().pc++;
+        instruction.setInstructionName("SET "+bit+","+source);
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_3;
+        return CPU.CPUCYCLE_2;
+    }),
+
+    BIT((cpu, instruction) -> {
+        int bit = instruction.getBit();
+        RegisterBank source = instruction.getLoadType().source;
+        int result = Utils.getBit(source.getValue(cpu),bit);
+
+        cpu.getRegisters().getF().SUBTRACT = false;
+        cpu.getRegisters().getF().HALF_CARRY = true;
+        if(bit < 8) cpu.getRegisters().getF().ZERO = (result == 0);
+
+        instruction.setInstructionName("BIT "+bit+","+source);
+        cpu.getRegisters().pc++;
+        cpu.getRegisters().pc++;
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_3;
+        return CPU.CPUCYCLE_2;
+    }),
+
     INC((cpu, instruction) -> {
         int value = instruction.registerBank.getValue(cpu);
         int result = (value+1) & 0xff;
@@ -144,7 +176,7 @@ public enum Instruction {
         instruction.setInstructionName("INC "+instruction.registerBank.getId());
         cpu.getRegisters().pc++;
 
-        if(instruction.getLoadType().target == RegisterBank.HLI) return CPU.CPUCYCLE_3;
+        if(instruction.registerBank == RegisterBank.HLI) return CPU.CPUCYCLE_3;
         return CPU.CPUCYCLE_1;
     }),
 
@@ -166,9 +198,9 @@ public enum Instruction {
         instruction.setInstructionName("JP "+instruction.getJumpOptions()+",(a16)");
         if(instruction.getJumpOptions().isMet(cpu)) {
             cpu.getRegisters().pc++;
-            byte lsb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            int lsb = cpu.getMemory().getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
-            byte msb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            int msb = cpu.getMemory().getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc = (short) (msb << 8 | lsb);
 
             return CPU.CPUCYCLE_4;
@@ -182,8 +214,9 @@ public enum Instruction {
         instruction.setInstructionName("JR "+instruction.getJumpOptions()+",(r8)");
         if(instruction.getJumpOptions().isMet(cpu)) {
             cpu.getRegisters().pc++;
-            byte e = cpu.getMemory().getByte(cpu.getRegisters().pc);
-            cpu.getRegisters().pc = (short) ((cpu.getRegisters().pc+e) & 0xffff);
+            int e = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            cpu.getRegisters().pc++;
+            cpu.getRegisters().pc = ((cpu.getRegisters().pc+e) & 0xff);
 
             return CPU.CPUCYCLE_3;
         } else {
@@ -277,6 +310,15 @@ public enum Instruction {
     InstructionRunnable runnable;
     Instruction(InstructionRunnable runnable){
         this.runnable = runnable;
+    }
+
+    private int bit;
+    public int getBit() {
+        return bit;
+    }
+    public Instruction setBit(int bit) {
+        this.bit = bit;
+        return this;
     }
 
     private RegisterBank registerBank;

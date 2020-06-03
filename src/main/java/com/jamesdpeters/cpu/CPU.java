@@ -6,6 +6,7 @@ import com.jamesdpeters.Utils;
 import com.jamesdpeters.cartridge.Cart;
 import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
+import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
 import com.jamesdpeters.memory.MemoryBus;
 
 public class CPU {
@@ -28,29 +29,30 @@ public class CPU {
 
     public CPU(){
         registers = new Registers();
-        cart = new Cart("tetris.gb");
-        memory = cart.rom;
-        registers.pc = 0x0100; //Entry point
-//        memory = new MemoryBus(BootRom.GAMEBOY_CLASSIC());
+//        cart = new Cart("tetris.gb");
+//        memory = cart.rom;
+//        registers.pc = 0x0100; //Entry point
+        memory = new MemoryBus(BootRom.GAMEBOY_CLASSIC);
         state = State.RUNNING;
-        setInitialConditions();
-        System.out.println(registers);
+        //setInitialConditions();
+        System.out.print(registers);
     }
 
     public int step(){
         if(state == State.HALT) return 0;
         if(state == State.RUNNING) {
             try {
-                byte instructionByte = memory.getByte(registers.pc);
-                Instruction instruction = InstructionBuilder.fromByteNotPrefixed(instructionByte);
+                int instructionByte = memory.getByte(registers.pc);
+                Instruction instruction = InstructionBuilder.fromByteNotPrefixed(this,instructionByte);
                 int cycle = instruction.run(this);
                 getRegisters().totalCycles += cycle;
                 if(GameBoy.VERBOSE) {
-                    System.out.println(" Code:"+Utils.byteToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
+                    System.out.println(" Code:"+Utils.intToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
                     System.out.print(registers);
                 }
                 return cycle;
-            } catch (UnknownInstructionException e) {
+            } catch (UnknownInstructionException | UnknownPrefixInstructionException e) {
+                System.out.println();
                 e.printStackTrace();
                 System.exit(-1);
             }
@@ -70,7 +72,7 @@ public class CPU {
         return memory;
     }
 
-    public byte readNextByte(){
+    public int readNextByte(){
         getRegisters().pc++;
         return getMemory().getByte(getRegisters().pc);
     }
@@ -84,7 +86,7 @@ public class CPU {
         return result;
     }
 
-    public byte readCurrentByte(){
+    public int readCurrentByte(){
         return getMemory().getByte(getRegisters().pc);
     }
 

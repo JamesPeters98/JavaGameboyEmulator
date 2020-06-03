@@ -5,10 +5,14 @@ import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.cpu.enums.JumpOptions;
 import com.jamesdpeters.cpu.enums.RegisterBank;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
+import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
 
 public class InstructionBuilder {
-    public static Instruction fromByteNotPrefixed(byte byte_) throws UnknownInstructionException {
+    public static Instruction fromByteNotPrefixed(CPU cpu, int byte_) throws UnknownInstructionException, UnknownPrefixInstructionException {
         int b = byte_ & 0xFF;
+
+        if(b == 0xCB) return fromBytePrefixed(cpu.memory.getByte(cpu.registers.pc+1));
+
         if(b == 0x00) return Instruction.NOP;
         if(b == 0x76) return Instruction.HALT;
         if(b == 0xf3) return Instruction.DI;
@@ -73,6 +77,8 @@ public class InstructionBuilder {
         //LDH
         if(b == 0xe0) return Instruction.LDH.setLoadType(RegisterBank.A, RegisterBank.A8);
         if(b == 0xf0) return Instruction.LDH.setLoadType(RegisterBank.A8, RegisterBank.A);
+        if(b == 0xe2) return Instruction.LDH.setLoadType(RegisterBank.A, RegisterBank.C_POINTER);
+        if(b == 0xf2) return Instruction.LDH.setLoadType(RegisterBank.C_POINTER, RegisterBank.A);
 
         //CP
         if(b == 0xfe) return Instruction.CP.setLoadType(RegisterBank.D8,RegisterBank.A);
@@ -87,6 +93,29 @@ public class InstructionBuilder {
         throw new UnknownInstructionException(b);
     }
 
+    private static Instruction fromBytePrefixed(int b) throws UnknownPrefixInstructionException, UnknownInstructionException {
+        //SET
+        if(inHorizontalRange(b,  0xC0,  0xC7)) return horizontalLoadType(Instruction.SET,  0xC0, b, null).setBit(0);
+        if(inHorizontalRange(b,  0xC8,  0xCF)) return horizontalLoadType(Instruction.SET,  0xC8, b, null).setBit(1);
+        if(inHorizontalRange(b,  0xD0,  0xD7)) return horizontalLoadType(Instruction.SET,  0xD0, b, null).setBit(2);
+        if(inHorizontalRange(b,  0xD8,  0xDF)) return horizontalLoadType(Instruction.SET,  0xD8, b, null).setBit(3);
+        if(inHorizontalRange(b,  0xE0,  0xE7)) return horizontalLoadType(Instruction.SET,  0xE0, b, null).setBit(4);
+        if(inHorizontalRange(b,  0xE8,  0xEF)) return horizontalLoadType(Instruction.SET,  0xE8, b, null).setBit(5);
+        if(inHorizontalRange(b,  0xF0,  0xF7)) return horizontalLoadType(Instruction.SET,  0xF0, b, null).setBit(6);
+        if(inHorizontalRange(b,  0xF8,  0xFF)) return horizontalLoadType(Instruction.SET,  0xF8, b, null).setBit(7);
+
+        //BIT
+        if(inHorizontalRange(b,  0x40,  0x47)) return horizontalLoadType(Instruction.BIT,  0x40, b, null).setBit(0);
+        if(inHorizontalRange(b,  0x48,  0x4F)) return horizontalLoadType(Instruction.BIT,  0x48, b, null).setBit(1);
+        if(inHorizontalRange(b,  0x50,  0x57)) return horizontalLoadType(Instruction.BIT,  0x50, b, null).setBit(2);
+        if(inHorizontalRange(b,  0x58,  0x5F)) return horizontalLoadType(Instruction.BIT,  0x58, b, null).setBit(3);
+        if(inHorizontalRange(b,  0x60,  0x67)) return horizontalLoadType(Instruction.BIT,  0x60, b, null).setBit(4);
+        if(inHorizontalRange(b,  0x68,  0x6F)) return horizontalLoadType(Instruction.BIT,  0x68, b, null).setBit(5);
+        if(inHorizontalRange(b,  0x70,  0x77)) return horizontalLoadType(Instruction.BIT,  0x70, b, null).setBit(6);
+        if(inHorizontalRange(b,  0x78,  0x7F)) return horizontalLoadType(Instruction.BIT,  0x78, b, null).setBit(7);
+
+        throw new UnknownPrefixInstructionException(b);
+    }
     private static boolean inHorizontalRange(int byte_, int start, int end){
         return (byte_ >= start) && (byte_ <= end);
     }
