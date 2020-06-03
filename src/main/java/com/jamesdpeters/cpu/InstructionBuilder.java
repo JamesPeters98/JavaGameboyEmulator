@@ -48,6 +48,13 @@ public class InstructionBuilder {
         if(b ==  0x28) return Instruction.JR.setJumpOptions(JumpOptions.Z);
         if(b ==  0x38) return Instruction.JR.setJumpOptions(JumpOptions.C);
 
+        //CALL
+        if(b == 0xCD) return Instruction.CALL.setJumpOptions(JumpOptions.ALWAYS);
+        if(b == 0xCC) return Instruction.CALL.setJumpOptions(JumpOptions.Z);
+        if(b == 0xDC) return Instruction.CALL.setJumpOptions(JumpOptions.C);
+        if(b == 0xC4) return Instruction.CALL.setJumpOptions(JumpOptions.NZ);
+        if(b == 0xD4) return Instruction.CALL.setJumpOptions(JumpOptions.NC);
+
         //LOAD INSTRUCTIONS
         if(inHorizontalRange(b,  0x40, 0x47)) return horizontalLoadType(Instruction.LD,  0x40, b, RegisterBank.B);
         if(inHorizontalRange(b,  0x50, 0x57)) return horizontalLoadType(Instruction.LD,  0x50, b, RegisterBank.D);

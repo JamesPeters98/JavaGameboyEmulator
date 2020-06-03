@@ -125,17 +125,6 @@ public enum Instruction {
         return CPU.CPUCYCLE_1;
     }),
 
-//    LD_RR_NN((cpu, instruction) -> {
-//        RegisterBank target = instruction.getLoadType().target;
-//        cpu.getRegisters().pc++;
-//        int lsb = cpu.readCurrentByte();
-//        cpu.getRegisters().pc++;
-//        int msb = cpu.readCurrentByte();
-//        int value = (lsb << 8 | msb);
-//        target.setValue(cpu,value);
-//        return cpu.getRegisters().pc++;
-//    }),
-
     SET((cpu, instruction) -> {
         int bit = instruction.getBit();
         RegisterBank source = instruction.getLoadType().source;
@@ -222,6 +211,27 @@ public enum Instruction {
         } else {
             cpu.getRegisters().pc = (short) (cpu.getRegisters().pc+2);
             return CPU.CPUCYCLE_2;
+        }
+    }),
+
+    CALL((cpu, instruction) -> {
+        instruction.setInstructionName("CALL "+instruction.getJumpOptions()+",(a16)");
+        cpu.getRegisters().pc++;
+        int lsb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+        cpu.getRegisters().pc++;
+        int msb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+        int nn = (msb << 8 | lsb);
+
+        if(instruction.getJumpOptions().isMet(cpu)) {
+            cpu.getRegisters().sp--;
+            cpu.getMemory().writeByte(cpu.getRegisters().sp, msb);
+            cpu.getRegisters().sp--;
+            cpu.getMemory().writeByte(cpu.getRegisters().sp, lsb);
+            cpu.getRegisters().pc = nn;
+            return CPU.CPUCYCLE_6;
+        } else {
+            cpu.getRegisters().pc++;
+            return CPU.CPUCYCLE_3;
         }
     }),
 

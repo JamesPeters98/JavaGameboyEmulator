@@ -50,6 +50,12 @@ public class Display {
         draw();
     }
 
+    public void setTile(int rowIndex, int colIndex, Tile tile){
+        System.out.println("Setting tile: "+rowIndex+","+colIndex);
+        int[] pixels = tile.getRGBArray();
+        image.setRGB(colIndex*8, rowIndex*8, 8, 8, pixels, 0, 8);
+    }
+
     public void draw(){
         Image resized = image.getScaledInstance(frame.getWidth(),frame.getHeight(),Image.SCALE_DEFAULT);
         panel.getGraphics().drawImage(resized,0,0,frame.getWidth(),frame.getHeight(),null);

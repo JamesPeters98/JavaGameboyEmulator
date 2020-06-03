@@ -6,7 +6,10 @@ import java.util.Arrays;
 
 public class MemoryBus {
 
+    public static boolean isBootRomEnabled = true;
+
     public enum Bank {
+        BOOT_ROM(0x00,0xFF),
         ROM(0x00, 0x7FFF),
         WORKING_RAM(0xC000, 0xDFFF),
         TILE_RAM(0x8000,0x97FF, GetterSetter.VRAM),
@@ -80,7 +83,9 @@ public class MemoryBus {
                 STATIC HELPER METHODS
                  */
         static Bank getMemory(int address){
-            for(Bank bank : Bank.values()){
+            if(isBootRomEnabled && address <= BOOT_ROM.endAddress) return BOOT_ROM;
+                for(Bank bank : Bank.values()){
+                if(!isBootRomEnabled && bank == BOOT_ROM) continue;
                 if(bank.inRange(address)) return bank;
             }
             throw new ArrayIndexOutOfBoundsException("No Memory Bank Implemented For Address: 0x"+Integer.toHexString(address));
@@ -109,6 +114,6 @@ public class MemoryBus {
     }
 
     public void writeByte(int address, int value){
-        Bank.setByte(address, value);
+        Bank.setByte(address & 0xFFFF, value);
     }
 }

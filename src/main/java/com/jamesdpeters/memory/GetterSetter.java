@@ -42,14 +42,15 @@ public class GetterSetter {
                 int rowIndex = (address % 16) / 2;
 
                 System.out.println();
-                System.out.println("Set Tile: "+tileIndex);
                 for(int pixel=0; pixel<8; pixel++){
                     int mask = 1 << (7 - pixel);
                     int lsb = b1 & mask;
                     int msb = b2 & mask;
 
+
                     Tiles.PixelValue pixelValue = Tiles.getPixelValue(lsb,msb);
                     Tiles.setTilePixel(tileIndex,rowIndex,pixel,pixelValue);
+                    System.out.println("Set Tile: "+tileIndex+" pixel: "+pixel+" value: "+pixelValue);
                 }
             }
     );
@@ -58,6 +59,12 @@ public class GetterSetter {
 
     public static final GetterSetter IOREGISTER = new GetterSetter(MemoryBus.Bank::getDirectByte, (bank, address, value) -> {
         System.out.println();
+
+        //Remove Boot Rom when called.
+        if(address == 0x50) {
+            System.out.println("Boot Rom Enabled: "+(value != 1));
+            MemoryBus.isBootRomEnabled = (value != 1);
+        }
         System.out.println("SETTING IO REGISTER ADDRESS: "+ Utils.intToString(address)+" to value: "+Utils.intToString(value));
         bank.setDirectByte(address,value);
         System.out.println(bank.toByteString());

@@ -1,6 +1,9 @@
 package com.jamesdpeters;
 
 import com.jamesdpeters.cpu.CPU;
+import com.jamesdpeters.gpu.Display;
+import com.jamesdpeters.gpu.Tile;
+import com.jamesdpeters.gpu.Tiles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,9 +28,9 @@ public class GameBoy {
         cpu.getRegisters().totalCycles += 4;
         int steps =0;
         while(true) {
-            if(cpu.getRegisters().totalCycles >= 300000){
-                System.exit(0);
-            }
+//            if(cpu.getRegisters().totalCycles >= 229388){
+//                break;
+//            }
 //            if(steps % 1000 == 0){
 //                System.out.println("Steps: "+steps);
 //                System.out.println(cpu.getRegisters());
@@ -36,6 +39,18 @@ public class GameBoy {
             steps++;
         }
 
+//        Display display = new Display();
+//        int tiles = 0;
+//        for(Tile tile : Tiles.getTiles()){
+//            tiles++;
+//            if(tiles > 360) break;
+//            int row = (tile.getIndex() / 20);
+//            int col = tile.getIndex() % 20;
+//            display.setTile(row,col,tile);
+//        }
+//        while(true){
+//            display.tick();
+//        }
 
     }
 }

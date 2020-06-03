@@ -20,6 +20,8 @@ public class CPU {
     public final static int CPUCYCLE_2 = 8;
     public final static int CPUCYCLE_3 = 12;
     public final static int CPUCYCLE_4 = 16;
+    public final static int CPUCYCLE_5 = 20;
+    public final static int CPUCYCLE_6 = 24;
 
     //VARS
     Registers registers;
