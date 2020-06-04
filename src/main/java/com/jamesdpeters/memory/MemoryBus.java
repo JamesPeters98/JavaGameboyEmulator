@@ -1,6 +1,8 @@
 package com.jamesdpeters.memory;
 
 import com.jamesdpeters.Utils;
+import com.jamesdpeters.exceptions.ReadOnlyException;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.Arrays;
 
@@ -9,28 +11,30 @@ public class MemoryBus {
     public static boolean isBootRomEnabled = true;
 
     public enum Bank {
-        BOOT_ROM(0x00,0xFF),
-        ROM(0x00, 0x7FFF),
+        BOOT_ROM(0x00,0xFF,GetterSetter.DEFAULT,true),
+        ROM(0x00, 0x7FFF,GetterSetter.DEFAULT,true),
         WORKING_RAM(0xC000, 0xDFFF),
-        TILE_RAM(0x8000,0x97FF, GetterSetter.VRAM),
+        TILE_RAM(0x8000,0x97FF, GetterSetter.VRAM,false),
         BACKGROUND_MAP(0x9800,0x9FFF),
-        IO_REGISTERS(0xFF00, 0xFF7F, GetterSetter.IOREGISTER),
+        IO_REGISTERS(0xFF00, 0xFF7F, GetterSetter.IOREGISTER,false),
         HIGH_RAM(0xFF80, 0xFFFE),
         INTERRUPT(0xFFFF, 0xFFFF);
 
         private int[] memory;
         private final int startAddress, endAddress;
+        private boolean readonly;
         private GetterSetter getterSetter;
-        Bank(int startAddress, int endAddress, GetterSetter getterSetter){
+        Bank(int startAddress, int endAddress, GetterSetter getterSetter, boolean readonly){
             this.startAddress = startAddress;
             this.endAddress = endAddress;
             this.getterSetter = getterSetter;
+            this.readonly = readonly;
             memory = new  int[endAddress-startAddress+1];
             System.out.println("Creating new Memory: "+toString()+" of size: "+memory.length+" bytes");
         }
 
         Bank(int startAddress, int endAddress){
-            this(startAddress,endAddress,GetterSetter.DEFAULT);
+            this(startAddress,endAddress,GetterSetter.DEFAULT,false);
         }
 
         boolean inRange(int address){
@@ -41,7 +45,8 @@ public class MemoryBus {
             return getterSetter.get(this, index(address));
         }
 
-        void set(int address, int value){
+        void set(int address, int value) throws ReadOnlyException {
+            if(readonly) throw new ReadOnlyException(this, address, value);
             getterSetter.set(this, index(address), value);
         }
 
@@ -83,11 +88,21 @@ public class MemoryBus {
                 STATIC HELPER METHODS
                  */
         static Bank getMemory(int address){
-            if(isBootRomEnabled && address <= BOOT_ROM.endAddress) return BOOT_ROM;
-                for(Bank bank : Bank.values()){
-                if(!isBootRomEnabled && bank == BOOT_ROM) continue;
-                if(bank.inRange(address)) return bank;
+
+            if(isBootRomEnabled && address <= BOOT_ROM.endAddress){
+                if(address == 0x14){
+                    System.out.println("Returning BootRom");
+                    int instruction = BOOT_ROM.get(address);
+                    System.out.println("Bootrom Instruction: "+Utils.intToString(instruction));
+                }
+                return BOOT_ROM;
             }
+                for(Bank bank : Bank.values()){
+                    if(!isBootRomEnabled && bank == BOOT_ROM) continue;
+                    if(bank.inRange(address)){
+                        return bank;
+                    }
+                }
             throw new ArrayIndexOutOfBoundsException("No Memory Bank Implemented For Address: 0x"+Integer.toHexString(address));
         }
 
@@ -96,24 +111,38 @@ public class MemoryBus {
         }
 
         static void setByte(int address, int value){
-            getMemory(address).set(address, value);
+            try {
+                getMemory(address).set(address, value);
+            } catch (ReadOnlyException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
         }
     }
 
-    public MemoryBus(int[] gameROM){
+//    public MemoryBus(int[] gameROM){
+//        System.out.println("ROM SIZE: "+gameROM.length);
+//        Bank.ROM.setMemory(gameROM);
+//    }
+
+    public static void setROM(int[] gameROM){
         System.out.println("ROM SIZE: "+gameROM.length);
         Bank.ROM.setMemory(gameROM);
     }
 
-    public int getByte(int address){
+    public static void setBootROM(int[] bootROM){
+        Bank.BOOT_ROM.setMemory(bootROM);
+    }
+
+    public static int getByte(int address){
         return Bank.getByte(address);
     }
 
-    public int[] getBytes(Bank bank, int start, int end){
+    public static int[] getBytes(Bank bank, int start, int end){
         return Arrays.copyOfRange(bank.toArray(), start, end);
     }
 
-    public void writeByte(int address, int value){
+    public static void writeByte(int address, int value){
         Bank.setByte(address & 0xFFFF, value);
     }
 }

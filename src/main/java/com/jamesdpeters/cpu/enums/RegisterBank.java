@@ -2,6 +2,7 @@ package com.jamesdpeters.cpu.enums;
 
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.CPU;
+import com.jamesdpeters.memory.MemoryBus;
 
 public enum RegisterBank {
     //Registers
@@ -21,10 +22,23 @@ public enum RegisterBank {
     D8("d8",CPU::readNextByte,(cpu, value) -> {}),
     D16("d16",CPU::readNextD16,(cpu, value) -> {}),
 
+    SP_DATA("", cpu -> {
+        int lsb = MemoryBus.getByte(cpu.getRegisters().sp++ & 0xFFFF);
+        int msb = MemoryBus.getByte(cpu.getRegisters().sp++ & 0xFFFF);
+        return (msb << 8 | lsb);
+    }, (cpu, value) -> {
+        int msb = ((value & 0xFF00) >> 8);
+        int lsb = (value & 0xFF);
+        cpu.getRegisters().sp--;
+        MemoryBus.writeByte(cpu.getRegisters().sp, msb);
+        cpu.getRegisters().sp--;
+        MemoryBus.writeByte(cpu.getRegisters().sp, lsb);
+    }),
+
     A8("(a8)",cpu -> {
         int n = cpu.readNextByte();
         int address = (0xFF << 8 | n) & 0xffff;
-        int result = cpu.getMemory().getByte(address);
+        int result = MemoryBus.getByte(address);
         System.out.println();
         System.out.println("n value = "+ Utils.intToString(n));
         System.out.println("adr value = "+ Utils.intToString(address));
@@ -33,27 +47,27 @@ public enum RegisterBank {
     },(cpu, value) -> {
         int n = cpu.readNextByte();
         int address = (0xFF << 8 | n) & 0xffff;
-        cpu.getMemory().writeByte(address, value);
+        MemoryBus.writeByte(address, value);
     },CPU.CPUCYCLE_2,CPU.CPUCYCLE_2),
 
     C_POINTER("(C)", cpu -> {
         int c = cpu.getRegisters().getC();
         int address = (0xFF << 8 | c) & 0xffff;
-        int result = cpu.getMemory().getByte(address);
+        int result = MemoryBus.getByte(address);
         return result;
     }, (cpu, value) -> {
         int c = cpu.getRegisters().getC();
         int address = (0xFF << 8 | c) & 0xffff;
-        cpu.getMemory().writeByte(address,value);
+        MemoryBus.writeByte(address,value);
     }),
 
-    BC_POINTER("(BC)",cpu -> cpu.getMemory().getByte(cpu.getRegisters().getBC()),(cpu, value) -> {cpu.getMemory().writeByte(cpu.getRegisters().getBC(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
-    DE_POINTER("(DE)",cpu -> cpu.getMemory().getByte(cpu.getRegisters().getDE()),(cpu, value) -> {cpu.getMemory().writeByte(cpu.getRegisters().getDE(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
+    BC_POINTER("(BC)",cpu -> MemoryBus.getByte(cpu.getRegisters().getBC()),(cpu, value) -> {MemoryBus.writeByte(cpu.getRegisters().getBC(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
+    DE_POINTER("(DE)",cpu -> MemoryBus.getByte(cpu.getRegisters().getDE()),(cpu, value) -> {MemoryBus.writeByte(cpu.getRegisters().getDE(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
 
     /**
      * Read/Write from memory at the address specified by the register HL.
      */
-    HLI("(HL)",cpu -> cpu.getMemory().getByte(cpu.getRegisters().getHL()),(cpu, value) -> {cpu.getMemory().writeByte(cpu.getRegisters().getHL(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
+    HLI("(HL)",cpu -> MemoryBus.getByte(cpu.getRegisters().getHL()),(cpu, value) -> {MemoryBus.writeByte(cpu.getRegisters().getHL(), value);},CPU.CPUCYCLE_1,CPU.CPUCYCLE_1),
 
     /**
      * Read/Write from memory at the address specified by the register HL and then INCREMENT from HL.

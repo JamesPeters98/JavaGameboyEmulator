@@ -2,16 +2,17 @@ package com.jamesdpeters.cpu;
 
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.enums.Instruction;
-import com.jamesdpeters.cpu.enums.JumpOptions;
+import com.jamesdpeters.cpu.enums.JumpCondition;
 import com.jamesdpeters.cpu.enums.RegisterBank;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
 import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
+import com.jamesdpeters.memory.MemoryBus;
 
 public class InstructionBuilder {
     public static Instruction fromByteNotPrefixed(CPU cpu, int byte_) throws UnknownInstructionException, UnknownPrefixInstructionException {
         int b = byte_ & 0xFF;
 
-        if(b == 0xCB) return fromBytePrefixed(cpu.memory.getByte(cpu.registers.pc+1));
+        if(b == 0xCB) return fromBytePrefixed(MemoryBus.getByte(cpu.registers.pc+1));
 
         if(b == 0x00) return Instruction.NOP;
         if(b == 0x76) return Instruction.HALT;
@@ -28,32 +29,48 @@ public class InstructionBuilder {
         //INCREMENTS
         if(inVerticalRange(b,  0x0C,  0x3C)) return verticalTargetCELA(Instruction.INC,  0x0C, b);
         if(inVerticalRange(b,  0x04,  0x34)) return verticalTargetBDHHL(Instruction.INC,  0x04, b);
+        if(inVerticalRange(b,  0x03,  0x33)) return verticalTargetBCDEHLSP(Instruction.INC_16,  0x03, b);
 
         //DECREMENTS
         if(inVerticalRange(b,  0x0D,  0x3D)) return verticalTargetCELA(Instruction.DEC,  0x0D, b);
         if(inVerticalRange(b,  0x05,  0x35)) return verticalTargetBDHHL(Instruction.DEC,  0x05, b);
+        if(inVerticalRange(b,  0x0B,  0x3B)) return verticalTargetBCDEHLSP(Instruction.DEC_16,  0x0B, b);
 
 
         //JUMP INSTRUCTIONS
-        if(b == 0xC3) return Instruction.JP_N16.setJumpOptions(JumpOptions.ALWAYS);
-        if(b == 0xC2) return Instruction.JP_N16.setJumpOptions(JumpOptions.NZ);
-        if(b == 0xD2) return Instruction.JP_N16.setJumpOptions(JumpOptions.NC);
-        if(b == 0xCA) return Instruction.JP_N16.setJumpOptions(JumpOptions.Z);
-        if(b == 0xDA) return Instruction.JP_N16.setJumpOptions(JumpOptions.C);
+        if(b == 0xC3) return Instruction.JP_N16.setJumpCondition(JumpCondition.ALWAYS);
+        if(b == 0xC2) return Instruction.JP_N16.setJumpCondition(JumpCondition.NZ);
+        if(b == 0xD2) return Instruction.JP_N16.setJumpCondition(JumpCondition.NC);
+        if(b == 0xCA) return Instruction.JP_N16.setJumpCondition(JumpCondition.Z);
+        if(b == 0xDA) return Instruction.JP_N16.setJumpCondition(JumpCondition.C);
+
+        //RETURN INSTRUCTIONS
+        if(b == 0xC0) return Instruction.RET.setJumpCondition(JumpCondition.NZ);
+        if(b == 0xD0) return Instruction.RET.setJumpCondition(JumpCondition.NC);
+        if(b == 0xC8) return Instruction.RET.setJumpCondition(JumpCondition.Z);
+        if(b == 0xD8) return Instruction.RET.setJumpCondition(JumpCondition.C);
+        if(b == 0xC9) return Instruction.RET.setJumpCondition(JumpCondition.ALWAYS);
+        if(b == 0xD9) return Instruction.RET.setJumpCondition(JumpCondition.ALWAYS_IME);
 
         //JR
-        if(b ==  0x18) return Instruction.JR.setJumpOptions(JumpOptions.ALWAYS);
-        if(b ==  0x20) return Instruction.JR.setJumpOptions(JumpOptions.NZ);
-        if(b ==  0x30) return Instruction.JR.setJumpOptions(JumpOptions.NC);
-        if(b ==  0x28) return Instruction.JR.setJumpOptions(JumpOptions.Z);
-        if(b ==  0x38) return Instruction.JR.setJumpOptions(JumpOptions.C);
+        if(b ==  0x18) return Instruction.JR.setJumpCondition(JumpCondition.ALWAYS);
+        if(b ==  0x20) return Instruction.JR.setJumpCondition(JumpCondition.NZ);
+        if(b ==  0x30) return Instruction.JR.setJumpCondition(JumpCondition.NC);
+        if(b ==  0x28) return Instruction.JR.setJumpCondition(JumpCondition.Z);
+        if(b ==  0x38) return Instruction.JR.setJumpCondition(JumpCondition.C);
 
         //CALL
-        if(b == 0xCD) return Instruction.CALL.setJumpOptions(JumpOptions.ALWAYS);
-        if(b == 0xCC) return Instruction.CALL.setJumpOptions(JumpOptions.Z);
-        if(b == 0xDC) return Instruction.CALL.setJumpOptions(JumpOptions.C);
-        if(b == 0xC4) return Instruction.CALL.setJumpOptions(JumpOptions.NZ);
-        if(b == 0xD4) return Instruction.CALL.setJumpOptions(JumpOptions.NC);
+        if(b == 0xCD) return Instruction.CALL.setJumpCondition(JumpCondition.ALWAYS);
+        if(b == 0xCC) return Instruction.CALL.setJumpCondition(JumpCondition.Z);
+        if(b == 0xDC) return Instruction.CALL.setJumpCondition(JumpCondition.C);
+        if(b == 0xC4) return Instruction.CALL.setJumpCondition(JumpCondition.NZ);
+        if(b == 0xD4) return Instruction.CALL.setJumpCondition(JumpCondition.NC);
+
+        //PUSH
+//        if(b == 0xC5) return Instruction.PUSH.setTarget(RegisterBank.BC);
+//        if(b == 0xD5) return Instruction.PUSH.setTarget(RegisterBank.DE);
+//        if(b == 0xE5) return Instruction.PUSH.setTarget(RegisterBank.HL);
+//        if(b == 0xF5) return Instruction.PUSH.setTarget(RegisterBank.AF);
 
         //LOAD INSTRUCTIONS
         if(inHorizontalRange(b,  0x40, 0x47)) return horizontalLoadType(Instruction.LD,  0x40, b, RegisterBank.B);
@@ -92,11 +109,18 @@ public class InstructionBuilder {
 
 
         //Rotate Operations
-        if(b == 0xf) return Instruction.RRC.setLoadType(null, RegisterBank.A);
-        if(b == 0x1f) return Instruction.RR.setLoadType(null, RegisterBank.A);
+        if(b == 0xf) return Instruction.RRC.setLoadType(RegisterBank.A, null).setClearZ(true);
+        if(b == 0x1f) return Instruction.RR.setLoadType(RegisterBank.A, null).setClearZ(true);
+        if(b == 0x7) return Instruction.RLC.setLoadType(RegisterBank.A, null).setClearZ(true);
+        if(b == 0x17) return Instruction.RL.setLoadType(RegisterBank.A, null).setClearZ(true);
+
+        //POP / PUSH
+        if(inVerticalRange(b, 0xC1,0xF1)) return verticalTargetBCDEHLAF(Instruction.POP, 0xC1, b, RegisterBank.SP_DATA);
+        if(inVerticalRange(b, 0xC5,0xF5)) return verticalTargetBCDEHLAF(Instruction.PUSH, 0xC5, b, RegisterBank.SP_DATA);
 
         //No instruction
         System.out.println();
+        System.err.println("PC: "+Utils.intToString(cpu.getRegisters().pc));
         throw new UnknownInstructionException(b);
     }
 
@@ -120,6 +144,12 @@ public class InstructionBuilder {
         if(inHorizontalRange(b,  0x68,  0x6F)) return horizontalLoadType(Instruction.BIT,  0x68, b, null).setBit(5);
         if(inHorizontalRange(b,  0x70,  0x77)) return horizontalLoadType(Instruction.BIT,  0x70, b, null).setBit(6);
         if(inHorizontalRange(b,  0x78,  0x7F)) return horizontalLoadType(Instruction.BIT,  0x78, b, null).setBit(7);
+
+        //RLC
+        if(inHorizontalRange(b,  0x00,  0x07)) return horizontalLoadType(Instruction.RLC,  0x0, b, null);
+        if(inHorizontalRange(b,  0x10,  0x17)) return horizontalLoadType(Instruction.RL,  0x10, b, null);
+        if(inHorizontalRange(b,  0x08,  0x0F)) return horizontalLoadType(Instruction.RRC,  0x08, b, null);
+        if(inHorizontalRange(b,  0x18,  0x1F)) return horizontalLoadType(Instruction.RRC,  0x18, b, null);
 
         throw new UnknownPrefixInstructionException(b);
     }
@@ -213,7 +243,7 @@ public class InstructionBuilder {
         throw new UnknownInstructionException(value);
     }
 
-    private static Instruction verticalTargetCELA(Instruction instruction, int start, int value) throws UnknownInstructionException {
+    private static Instruction verticalTargetCELA(Instruction instruction, int start, int value) {
         int offset = value - start;
         switch (offset){
             case 0: return instruction.setTarget(RegisterBank.C);
@@ -224,13 +254,35 @@ public class InstructionBuilder {
         return null;
     }
 
-    private static Instruction verticalTargetBDHHL(Instruction instruction, int start, int value) throws UnknownInstructionException {
+    private static Instruction verticalTargetBDHHL(Instruction instruction, int start, int value) {
         int offset = value - start;
         switch (offset){
             case 0: return instruction.setTarget(RegisterBank.B);
             case 0x10: return instruction.setTarget(RegisterBank.D);
             case 0x20: return instruction.setTarget(RegisterBank.H);
             case 0x30: return instruction.setTarget(RegisterBank.HLI);
+        }
+        return null;
+    }
+
+    private static Instruction verticalTargetBCDEHLSP(Instruction instruction, int start, int value) {
+        int offset = value - start;
+        switch (offset){
+            case 0: return instruction.setTarget(RegisterBank.BC);
+            case 0x10: return instruction.setTarget(RegisterBank.DE);
+            case 0x20: return instruction.setTarget(RegisterBank.HL);
+            case 0x30: return instruction.setTarget(RegisterBank.SP);
+        }
+        return null;
+    }
+
+    private static Instruction verticalTargetBCDEHLAF(Instruction instruction, int start, int value, RegisterBank source) {
+        int offset = value - start;
+        switch (offset){
+            case 0: return instruction.setLoadType(source,RegisterBank.BC);
+            case 0x10: return instruction.setLoadType(source,RegisterBank.DE);
+            case 0x20: return instruction.setLoadType(source,RegisterBank.HL);
+            case 0x30: return instruction.setLoadType(source,RegisterBank.AF);
         }
         return null;
     }

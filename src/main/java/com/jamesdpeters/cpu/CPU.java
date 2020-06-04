@@ -26,15 +26,13 @@ public class CPU {
     //VARS
     Registers registers;
     Cart cart;
-    MemoryBus memory;
     State state;
 
     public CPU(){
         registers = new Registers();
-//        cart = new Cart("tetris.gb");
-//        memory = cart.rom;
-//        registers.pc = 0x0100; //Entry point
-        memory = new MemoryBus(BootRom.GAMEBOY_CLASSIC);
+        cart = new Cart("tetris.gb");
+        MemoryBus.setROM(cart.rom);
+        MemoryBus.setBootROM(BootRom.GAMEBOY_CLASSIC);
         state = State.RUNNING;
         //setInitialConditions();
         System.out.print(registers);
@@ -44,12 +42,17 @@ public class CPU {
         if(state == State.HALT) return 0;
         if(state == State.RUNNING) {
             try {
-                int instructionByte = memory.getByte(registers.pc);
+                int instructionByte = MemoryBus.getByte(registers.pc);
                 Instruction instruction = InstructionBuilder.fromByteNotPrefixed(this,instructionByte);
                 int cycle = instruction.run(this);
                 getRegisters().totalCycles += cycle;
                 if(GameBoy.VERBOSE) {
-                    System.out.println(" Code:"+Utils.intToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
+                    if(instructionByte == 0xCB){
+                        int instructionByteNext = MemoryBus.getByte(registers.pc);
+                        System.out.println(" | Next Instruction: 0xCB -> "+Utils.intToString(instructionByteNext) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
+                    } else {
+                        System.out.println(" | Next Instruction: " + Utils.intToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: " + cycle);
+                    }
                     System.out.print(registers);
                 }
                 return cycle;
@@ -70,26 +73,22 @@ public class CPU {
         return cart;
     }
 
-    public MemoryBus getMemory() {
-        return memory;
-    }
-
     public int readNextByte(){
         getRegisters().pc++;
-        return getMemory().getByte(getRegisters().pc);
+        return MemoryBus.getByte(getRegisters().pc);
     }
 
     public int readNextD16(){
         getRegisters().pc++;
-        int lsb = getMemory().getByte(getRegisters().pc) & 0xFF;
+        int lsb = MemoryBus.getByte(getRegisters().pc) & 0xFF;
         getRegisters().pc++;
-        int msb = getMemory().getByte(getRegisters().pc);
+        int msb = MemoryBus.getByte(getRegisters().pc);
         int result = msb << 8 | lsb;
         return result;
     }
 
     public int readCurrentByte(){
-        return getMemory().getByte(getRegisters().pc);
+        return MemoryBus.getByte(getRegisters().pc);
     }
 
     public void setState(State state){
@@ -108,10 +107,10 @@ public class CPU {
 //        getRegisters().getF().HALF_CARRY = true;
 //        getRegisters().getF().CARRY = true;
 
-        getMemory().writeByte(0xFF05, (byte) 0x00);
-        getMemory().writeByte(0xFF06, (byte) 0x00);
-        getMemory().writeByte(0xFF07, (byte) 0x00);
-        getMemory().writeByte(0xFF10, (byte) 0x80);
+//        getMemory().writeByte(0xFF05, (byte) 0x00);
+//        getMemory().writeByte(0xFF06, (byte) 0x00);
+//        getMemory().writeByte(0xFF07, (byte) 0x00);
+//        getMemory().writeByte(0xFF10, (byte) 0x80);
 
     }
 }

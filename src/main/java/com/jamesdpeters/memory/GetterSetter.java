@@ -50,7 +50,7 @@ public class GetterSetter {
 
                     Tiles.PixelValue pixelValue = Tiles.getPixelValue(lsb,msb);
                     Tiles.setTilePixel(tileIndex,rowIndex,pixel,pixelValue);
-                    System.out.println("Set Tile: "+tileIndex+" pixel: "+pixel+" value: "+pixelValue);
+                    System.out.println("Set Tile: "+tileIndex+" row: "+rowIndex+" pixel: "+pixel+" value: "+pixelValue);
                 }
             }
     );
@@ -58,15 +58,16 @@ public class GetterSetter {
     public static final GetterSetter DEFAULT = new GetterSetter(MemoryBus.Bank::getDirectByte, MemoryBus.Bank::setDirectByte);
 
     public static final GetterSetter IOREGISTER = new GetterSetter(MemoryBus.Bank::getDirectByte, (bank, address, value) -> {
-        System.out.println();
+//        System.out.println();
 
         //Remove Boot Rom when called.
         if(address == 0x50) {
             System.out.println("Boot Rom Enabled: "+(value != 1));
             MemoryBus.isBootRomEnabled = (value != 1);
+            System.exit(-1);
         }
-        System.out.println("SETTING IO REGISTER ADDRESS: "+ Utils.intToString(address)+" to value: "+Utils.intToString(value));
+//        System.out.println("SETTING IO REGISTER ADDRESS: "+ Utils.intToString(address)+" to value: "+Utils.intToString(value));
         bank.setDirectByte(address,value);
-        System.out.println(bank.toByteString());
+//        System.out.println(bank.toByteString());
     });
 }

@@ -3,6 +3,7 @@ package com.jamesdpeters.cpu.enums;
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.CPU;
 import com.jamesdpeters.cpu.FlagsRegister;
+import com.jamesdpeters.memory.MemoryBus;
 
 public enum Instruction {
 
@@ -79,37 +80,37 @@ public enum Instruction {
         return CPU.CPUCYCLE_1;
     }),
 
-//    LDH_A((cpu, instruction) -> {
-//        int n = cpu.readNextByte();
-//        int address = (0xFF << 8 | n) & 0xffff;
-//        int value = cpu.getMemory().getByte(address);
-//        instruction.loadType.target.setValue(cpu,value);
-//        return cpu.getRegisters().pc++;
-//    }),
-
     RRC((cpu, instruction) -> {
-        int targetValue = instruction.getLoadType().target.getValue(cpu);
+        FlagsRegister flags = cpu.getRegisters().getF();
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
         int result = targetValue >> 1;
         if((targetValue & 1) == 1){
             result |= (1 << 7);
-            cpu.getRegisters().getF().CARRY = true;
+            flags.CARRY = true;
         } else {
-            cpu.getRegisters().getF().CARRY = false;
+            flags.CARRY = false;
         }
-        cpu.getRegisters().getF().ZERO = (result == 0);
-        cpu.getRegisters().getF().HALF_CARRY = false;
-        cpu.getRegisters().getF().SUBTRACT = false;
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
 
-        instruction.setInstructionName("RRC "+instruction.getLoadType().target.getId());
+        instruction.getLoadType().source.setValue(cpu,result);
+
+        if(instruction.isClearZ()){
+            flags.ZERO = false;
+            instruction.setInstructionName("RRC"+instruction.getLoadType().source.getId());
+        } else {
+            instruction.setInstructionName("RRC "+instruction.getLoadType().source.getId());
+        }
         cpu.getRegisters().pc++;
 
-        if(instruction.getLoadType().target == RegisterBank.HLI) return CPU.CPUCYCLE_2;
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_2;
         return CPU.CPUCYCLE_1;
     }),
 
     RR((cpu, instruction) -> {
         FlagsRegister flags = cpu.getRegisters().getF();
-        int targetValue = instruction.getLoadType().target.getValue(cpu);
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
         int result = targetValue >> 1;
         result |= flags.CARRY ? (1 << 7) : 0;
 
@@ -117,12 +118,80 @@ public enum Instruction {
         flags.ZERO = (result == 0);
         flags.HALF_CARRY = false;
         flags.SUBTRACT = false;
-
-        instruction.setInstructionName("RR "+instruction.getLoadType().target.getId());
         cpu.getRegisters().pc++;
 
-        if(instruction.getLoadType().target == RegisterBank.HLI) return CPU.CPUCYCLE_2;
-        return CPU.CPUCYCLE_1;
+        instruction.getLoadType().source.setValue(cpu,result);
+
+
+        if(instruction.isClearZ()){
+            flags.ZERO = false;
+            instruction.setInstructionName("RR"+instruction.getLoadType().source.getId());
+            return CPU.CPUCYCLE_1;
+        } else {
+            instruction.setInstructionName("RR "+instruction.getLoadType().source.getId());
+            cpu.getRegisters().pc++;
+        }
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
+    }),
+
+    RLC((cpu, instruction) -> {
+        FlagsRegister flags = cpu.getRegisters().getF();
+        System.out.println("RLC Source: "+instruction.getLoadType().source.getId());
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
+        int result = (targetValue << 1) & 0xFF;
+        if((targetValue & (1<<7)) != 0){
+            result |= 1;
+            flags.CARRY = true;
+        } else {
+            flags.CARRY = false;
+        }
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
+        cpu.getRegisters().pc++;
+        instruction.getLoadType().source.setValue(cpu,result);
+
+
+
+        if(instruction.isClearZ()){
+            flags.ZERO = false;
+            instruction.setInstructionName("RLC"+instruction.getLoadType().source.getId());
+            return CPU.CPUCYCLE_1;
+        } else {
+            instruction.setInstructionName("RLC "+instruction.getLoadType().source.getId());
+            cpu.getRegisters().pc++;
+        }
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
+    }),
+
+    RL((cpu, instruction) -> {
+        FlagsRegister flags = cpu.getRegisters().getF();
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
+        int result = (targetValue << 1) & 0xFF;
+        result |= flags.CARRY ? 1 : 0;
+
+        flags.CARRY = (targetValue & (1<<7)) != 0;
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
+        cpu.getRegisters().pc++;
+        instruction.getLoadType().source.setValue(cpu,result);
+
+        if(instruction.isClearZ()){
+            flags.ZERO = false;
+            instruction.setInstructionName("RL"+instruction.getLoadType().source.getId());
+            return CPU.CPUCYCLE_1;
+        } else {
+            instruction.setInstructionName("RL "+instruction.getLoadType().source.getId());
+            cpu.getRegisters().pc++;
+        }
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
     }),
 
     SET((cpu, instruction) -> {
@@ -169,6 +238,16 @@ public enum Instruction {
         return CPU.CPUCYCLE_1;
     }),
 
+    INC_16((cpu, instruction) -> {
+        int value = instruction.registerBank.getValue(cpu);
+        int result = (value+1) & 0xffff;
+        instruction.registerBank.setValue(cpu, result);
+        instruction.setInstructionName("INC "+instruction.registerBank.getId());
+        cpu.getRegisters().pc++;
+
+        return CPU.CPUCYCLE_2;
+    }),
+
     DEC((cpu, instruction) -> {
         int value = instruction.registerBank.getValue(cpu);
         int result = (value-1) & 0xFF;
@@ -183,13 +262,24 @@ public enum Instruction {
         return CPU.CPUCYCLE_1;
     }),
 
+    DEC_16((cpu, instruction) -> {
+        int value = instruction.registerBank.getValue(cpu);
+        int result = (value-1) & 0xFF;
+
+        instruction.registerBank.setValue(cpu, result);
+        instruction.setInstructionName("DEC "+instruction.registerBank.getId());
+        cpu.getRegisters().pc++;
+
+        return CPU.CPUCYCLE_2;
+    }),
+
     JP_N16((cpu, instruction) -> {
-        instruction.setInstructionName("JP "+instruction.getJumpOptions()+",(a16)");
-        if(instruction.getJumpOptions().isMet(cpu)) {
+        instruction.setInstructionName("JP "+instruction.getJumpCondition()+",(a16)");
+        if(instruction.getJumpCondition().isMet(cpu)) {
             cpu.getRegisters().pc++;
-            int lsb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            int lsb = MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
-            int msb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            int msb = MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc = (short) (msb << 8 | lsb);
 
             return CPU.CPUCYCLE_4;
@@ -200,10 +290,10 @@ public enum Instruction {
     }),
 
     JR((cpu, instruction) -> {
-        instruction.setInstructionName("JR "+instruction.getJumpOptions()+",(r8)");
-        if(instruction.getJumpOptions().isMet(cpu)) {
+        instruction.setInstructionName("JR "+instruction.getJumpCondition()+",(r8)");
+        if(instruction.getJumpCondition().isMet(cpu)) {
             cpu.getRegisters().pc++;
-            int e = cpu.getMemory().getByte(cpu.getRegisters().pc);
+            int e = MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
             cpu.getRegisters().pc = ((cpu.getRegisters().pc+e) & 0xff);
 
@@ -215,18 +305,18 @@ public enum Instruction {
     }),
 
     CALL((cpu, instruction) -> {
-        instruction.setInstructionName("CALL "+instruction.getJumpOptions()+",(a16)");
+        instruction.setInstructionName("CALL "+instruction.getJumpCondition()+",(a16)");
         cpu.getRegisters().pc++;
-        int lsb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+        int lsb = MemoryBus.getByte(cpu.getRegisters().pc);
         cpu.getRegisters().pc++;
-        int msb = cpu.getMemory().getByte(cpu.getRegisters().pc);
+        int msb = MemoryBus.getByte(cpu.getRegisters().pc);
         int nn = (msb << 8 | lsb);
 
-        if(instruction.getJumpOptions().isMet(cpu)) {
+        if(instruction.getJumpCondition().isMet(cpu)) {
             cpu.getRegisters().sp--;
-            cpu.getMemory().writeByte(cpu.getRegisters().sp, msb);
+            MemoryBus.writeByte(cpu.getRegisters().sp, msb);
             cpu.getRegisters().sp--;
-            cpu.getMemory().writeByte(cpu.getRegisters().sp, lsb);
+            MemoryBus.writeByte(cpu.getRegisters().sp, lsb);
             cpu.getRegisters().pc = nn;
             return CPU.CPUCYCLE_6;
         } else {
@@ -234,6 +324,46 @@ public enum Instruction {
             return CPU.CPUCYCLE_3;
         }
     }),
+
+    POP((cpu, instruction) -> {
+        instruction.getLoadType().target.setValue(cpu, instruction.getLoadType().source.getValue(cpu));
+        cpu.getRegisters().pc++;
+        instruction.setInstructionName("POP "+instruction.getLoadType().target.getId());
+
+        return CPU.CPUCYCLE_3;
+    }),
+
+    PUSH((cpu, instruction) -> {
+        instruction.getLoadType().source.setValue(cpu, instruction.getLoadType().target.getValue(cpu));
+        cpu.getRegisters().pc++;
+        instruction.setInstructionName("PUSH "+instruction.getLoadType().target.getId());
+
+        return CPU.CPUCYCLE_4;
+    }),
+
+    RET((cpu, instruction) -> {
+        if(instruction.getJumpCondition().isMet(cpu)){
+            cpu.getRegisters().pc = RegisterBank.SP_DATA.getValue(cpu);
+            if(instruction.getJumpCondition() == JumpCondition.ALWAYS_IME) cpu.getRegisters().IME = 1;
+            if(instruction.getJumpCondition() == JumpCondition.ALWAYS) return CPU.CPUCYCLE_4;
+            return CPU.CPUCYCLE_5;
+        } else {
+            cpu.getRegisters().pc++;
+            return CPU.CPUCYCLE_2;
+        }
+    }),
+
+//    PUSH((cpu, instruction) -> {
+//        int register = instruction.getRegisterBank().getValue(cpu);
+//        int msb = ((register & 0xFF00) >> 8);
+//        int lsb = (register & 0xFF);
+//        MemoryBus.writeByte(--cpu.getRegisters().sp, msb);
+//        MemoryBus.writeByte(--cpu.getRegisters().sp, lsb);
+//        cpu.getRegisters().pc++;
+//
+//        instruction.setInstructionName("PUSH "+instruction.getRegisterBank().getId());
+//        return CPU.CPUCYCLE_1;
+//    }),
 
     ADD((cpu,instruction) -> {
         int byte1 = instruction.getLoadType().source.getValue(cpu);
@@ -338,10 +468,10 @@ public enum Instruction {
         return this;
     }
 
-    private JumpOptions jumpOptions;
-    public JumpOptions getJumpOptions() {return jumpOptions;}
-    public Instruction setJumpOptions(JumpOptions options){
-        this.jumpOptions = options;
+    private JumpCondition jumpCondition;
+    public JumpCondition getJumpCondition() {return jumpCondition;}
+    public Instruction setJumpCondition(JumpCondition options){
+        this.jumpCondition = options;
         return this;
     }
 
@@ -351,6 +481,13 @@ public enum Instruction {
     }
     public Instruction setLoadType(RegisterBank source, RegisterBank target){
         loadType = new LoadType(source, target);
+        return this;
+    }
+
+    private boolean clearZ;
+    public boolean isClearZ(){ return clearZ;}
+    public Instruction setClearZ(boolean clearZ) {
+        this.clearZ = clearZ;
         return this;
     }
 
@@ -376,7 +513,9 @@ public enum Instruction {
 
     //Run instruction on given CPU.
     public int run(CPU cpu){
-        return runnable.run(cpu, this);
+        int result = runnable.run(cpu, this);
+        setClearZ(false);
+        return result;
     }
 }
 
