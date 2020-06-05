@@ -79,7 +79,7 @@ public class MemoryBus {
         public String toByteString() {
             StringBuilder builder = new StringBuilder();
             for(int b : memory){
-                builder.append(Integer.toHexString(b)).append(" ");
+                builder.append(Utils.intToString(b)).append(" ");
             }
             return builder.toString();
         }
@@ -90,11 +90,11 @@ public class MemoryBus {
         static Bank getMemory(int address){
 
             if(isBootRomEnabled && address <= BOOT_ROM.endAddress){
-                if(address == 0x14){
-                    System.out.println("Returning BootRom");
-                    int instruction = BOOT_ROM.get(address);
-                    System.out.println("Bootrom Instruction: "+Utils.intToString(instruction));
-                }
+//                if(address == 0x14){
+//                    System.out.println("Returning BootRom");
+//                    int instruction = BOOT_ROM.get(address);
+//                    System.out.println("Bootrom Instruction: "+Utils.intToString(instruction));
+//                }
                 return BOOT_ROM;
             }
                 for(Bank bank : Bank.values()){

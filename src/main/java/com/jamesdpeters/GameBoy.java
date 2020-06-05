@@ -4,12 +4,14 @@ import com.jamesdpeters.cpu.CPU;
 import com.jamesdpeters.gpu.Display;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.Tiles;
+import com.jamesdpeters.memory.MemoryBus;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+import java.util.Scanner;
 
 public class GameBoy {
 
@@ -22,13 +24,32 @@ public class GameBoy {
 //            display.tick();
 //        }
 
-
+        Scanner scanner = new Scanner(System.in);
 
         CPU cpu = new CPU();
         cpu.getRegisters().totalCycles += 4;
         int steps =0;
+
+        boolean debugStep = false;
+        Display display = new Display();
+
+
         while(true) {
-//            if(cpu.getRegisters().totalCycles >= 229388){
+            if(cpu.getRegisters().pc == 0x0042 || debugStep){
+                debugStep = true;
+
+                int tiles = 0;
+                for(Tile tile : Tiles.getTiles()){
+                    tiles++;
+                    if(tiles > 360) break;
+                    int row = (tile.getIndex() / 20);
+                    int col = tile.getIndex() % 20;
+                    display.setTile(row,col,tile);
+                }
+                display.draw();
+                scanner.nextLine();
+            }
+//            if(cpu.getRegisters().totalCycles >= 230412){
 //                break;
 //            }
 //            if(steps % 1000 == 0){
@@ -39,15 +60,9 @@ public class GameBoy {
             steps++;
         }
 
-//        Display display = new Display();
-//        int tiles = 0;
-//        for(Tile tile : Tiles.getTiles()){
-//            tiles++;
-//            if(tiles > 360) break;
-//            int row = (tile.getIndex() / 20);
-//            int col = tile.getIndex() % 20;
-//            display.setTile(row,col,tile);
-//        }
+        //System.out.println(MemoryBus.Bank.HIGH_RAM.toByteString());
+
+
 //        while(true){
 //            display.tick();
 //        }

@@ -83,8 +83,7 @@ public class CPU {
         int lsb = MemoryBus.getByte(getRegisters().pc) & 0xFF;
         getRegisters().pc++;
         int msb = MemoryBus.getByte(getRegisters().pc);
-        int result = msb << 8 | lsb;
-        return result;
+        return msb << 8 | lsb;
     }
 
     public int readCurrentByte(){

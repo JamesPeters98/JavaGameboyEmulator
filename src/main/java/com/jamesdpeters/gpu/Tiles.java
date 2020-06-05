@@ -7,13 +7,16 @@ import java.util.TreeMap;
 public class Tiles {
 
     public enum PixelValue {
-        WHITE, //11
-        DARK_GRAY, //10
-        LIGHT_GRAY, //01
-        BLACK; //00
+        ZERO, //00
+        TWO, //10
+        ONE, //01
+        THREE, //11
+        ERROR;
 
+        private Color color;
+        public void setColor(Color color){this.color = color;}
         public int getRGB(){
-            return Tiles.getRGB(this);
+            return color.getRGB();
         }
     }
 
@@ -21,25 +24,24 @@ public class Tiles {
     private final static Color LIGHT_GRAY = new Color(178,178,178);
     private final static Color DARK_GRAY = new Color(102,102,102);
     private final static Color BLACK = new Color(0,0,0);
-
-    private static int getRGB(PixelValue pixelValue){
-        switch (pixelValue){
-            case WHITE: return WHITE.getRGB();
-            case LIGHT_GRAY: return LIGHT_GRAY.getRGB();
-            case DARK_GRAY: return DARK_GRAY.getRGB();
-            case BLACK: return BLACK.getRGB();
-
-            default: return WHITE.getRGB();
-        }
-    }
+    private final static Color ERROR = new Color(255,0,0);
 
     public static PixelValue getPixelValue(int lsb, int msb){
-        if(lsb == 1 & msb == 1) return PixelValue.WHITE;
-        if(lsb == 0 & msb == 1) return PixelValue.DARK_GRAY;
-        if(lsb == 1 & msb == 0) return PixelValue.LIGHT_GRAY;
-        if(lsb == 0 & msb == 0) return PixelValue.BLACK;
+        if(lsb != 0 && msb != 0) return PixelValue.THREE;
+        if(lsb == 0 && msb != 0) return PixelValue.TWO;
+        if(lsb != 0 && msb == 0) return PixelValue.ONE;
+        if(lsb == 0 && msb == 0) return PixelValue.ZERO;
+        return PixelValue.ERROR;
+    }
 
-        return PixelValue.WHITE;
+    private static Color getColor(int color){
+        switch (color){
+            case 3: return BLACK;
+            case 2: return DARK_GRAY;
+            case 1: return LIGHT_GRAY;
+            case 0: return WHITE;
+            default: return ERROR;
+        }
     }
 
     private static TreeMap<Integer, Tile> tileMap = new TreeMap<>();
@@ -51,13 +53,23 @@ public class Tiles {
             tileMap.put(tileIndex, tile);
         }
         tile.setPixel(rowIndex, pixelIndex, pixelValue);
-        //System.out.println("Setting Tile "+tileIndex+" row:"+" pixel: "+pixelIndex+" to value: "+pixelValue);
     }
 
     public static Collection<Tile> getTiles(){
         return tileMap.values();
     }
 
+    /** Cache color palette **/
+    public static void setColorPalette(int BGP){
+        PixelValue.ZERO.setColor(getColor(getBits(BGP,0)));
+        PixelValue.ONE.setColor(getColor(getBits(BGP,1)));
+        PixelValue.TWO.setColor(getColor(getBits(BGP,2)));
+        PixelValue.THREE.setColor(getColor(getBits(BGP,3)));
+    }
 
+    /** Color - 0-3 **/
+    private static int getBits(int value, int pos){
+        return (((1 << 2) - 1) & (value >> (2*pos)));
+    }
 
 }

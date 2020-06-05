@@ -9,6 +9,9 @@ public class Utils {
     public static String intToString(int b){
         return "0x"+Integer.toHexString(b & 0xFFFF);
     }
+    public static String intToBinaryString(int b){
+        return "0b"+Integer.toBinaryString(b & 0xFFFF);
+    }
 
     public static char getHexChar(int b, int pos){
         String hexByte = Utils.intToString(b);

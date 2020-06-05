@@ -83,6 +83,10 @@ public class InstructionBuilder {
         if(inHorizontalRange(b,  0x68, 0x6F)) return horizontalLoadType(Instruction.LD,  0x68, b, RegisterBank.L);
         if(inHorizontalRange(b,  0x78, 0x7F)) return horizontalLoadType(Instruction.LD,  0x78, b, RegisterBank.A);
 
+        //A16 Load
+        if(b == 0xEA) return Instruction.LD_16.setLoadType(RegisterBank.A,RegisterBank.A16);
+        if(b == 0xFA) return Instruction.LD_16.setLoadType(RegisterBank.A16,RegisterBank.A);
+
         //16 Bit Load Operations.
         if(b == 0x02) return Instruction.LD_R16_A.setLoadType(RegisterBank.A, RegisterBank.BC_POINTER);
         if(b == 0x12) return Instruction.LD_R16_A.setLoadType(RegisterBank.A, RegisterBank.DE_POINTER);

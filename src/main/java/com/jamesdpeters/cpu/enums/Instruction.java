@@ -35,6 +35,7 @@ public enum Instruction {
 
         instruction.setInstructionName("LD "+target.getId()+","+source.getId());
         if(source == RegisterBank.HLI || source == RegisterBank.D8) return CPU.CPUCYCLE_2;
+        if(source == RegisterBank.A16) return CPU.CPUCYCLE_4;
         return CPU.CPUCYCLE_1;
     }),
 
@@ -306,17 +307,14 @@ public enum Instruction {
 
     CALL((cpu, instruction) -> {
         instruction.setInstructionName("CALL "+instruction.getJumpCondition()+",(a16)");
-        cpu.getRegisters().pc++;
-        int lsb = MemoryBus.getByte(cpu.getRegisters().pc);
-        cpu.getRegisters().pc++;
-        int msb = MemoryBus.getByte(cpu.getRegisters().pc);
+        int lsb = MemoryBus.getByte(++cpu.getRegisters().pc);
+        int msb = MemoryBus.getByte(++cpu.getRegisters().pc);
         int nn = (msb << 8 | lsb);
 
         if(instruction.getJumpCondition().isMet(cpu)) {
-            cpu.getRegisters().sp--;
-            MemoryBus.writeByte(cpu.getRegisters().sp, msb);
-            cpu.getRegisters().sp--;
-            MemoryBus.writeByte(cpu.getRegisters().sp, lsb);
+            int pc = cpu.getRegisters().pc+1;
+            MemoryBus.writeByte(--cpu.getRegisters().sp, (pc & 0xff00) >> 8);
+            MemoryBus.writeByte(--cpu.getRegisters().sp, (pc & 0xff));
             cpu.getRegisters().pc = nn;
             return CPU.CPUCYCLE_6;
         } else {
@@ -344,8 +342,15 @@ public enum Instruction {
     RET((cpu, instruction) -> {
         if(instruction.getJumpCondition().isMet(cpu)){
             cpu.getRegisters().pc = RegisterBank.SP_DATA.getValue(cpu);
-            if(instruction.getJumpCondition() == JumpCondition.ALWAYS_IME) cpu.getRegisters().IME = 1;
-            if(instruction.getJumpCondition() == JumpCondition.ALWAYS) return CPU.CPUCYCLE_4;
+            instruction.setInstructionName("RET "+instruction.getJumpCondition());
+            if(instruction.getJumpCondition() == JumpCondition.ALWAYS_IME){
+                cpu.getRegisters().IME = 1;
+                instruction.setInstructionName("RETI");
+            }
+            if(instruction.getJumpCondition() == JumpCondition.ALWAYS){
+                instruction.setInstructionName("RET");
+                return CPU.CPUCYCLE_4;
+            }
             return CPU.CPUCYCLE_5;
         } else {
             cpu.getRegisters().pc++;

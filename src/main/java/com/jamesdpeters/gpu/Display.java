@@ -51,7 +51,7 @@ public class Display {
     }
 
     public void setTile(int rowIndex, int colIndex, Tile tile){
-        System.out.println("Setting tile: "+rowIndex+","+colIndex);
+        //System.out.println("Setting tile: "+rowIndex+","+colIndex);
         int[] pixels = tile.getRGBArray();
         image.setRGB(colIndex*8, rowIndex*8, 8, 8, pixels, 0, 8);
     }
