@@ -2,13 +2,12 @@ package com.jamesdpeters.gpu;
 
 public class Tile {
 
-    int index;
-
-    Tiles.PixelValue[][] pixels; //Row Index, Pixel Index
+    private int index;
+    private Tiles.PixelValue[][] pixels; //Row Index, Pixel Index
 
     public Tile(int index){
         this.index = index;
-        pixels = new Tiles.PixelValue[8][8];
+        pixels = new Tiles.PixelValue[getRows()][getCols()];
     }
 
     public void setPixel(int rowIndex, int pixelIndex, Tiles.PixelValue pixelValue){
@@ -24,7 +23,7 @@ public class Tile {
     }
 
     public int[] getRGBArray(){
-        int[] array = new int[64];
+        int[] array = new int[getCols()*getRows()];
         int index = 0;
         for(Tiles.PixelValue[] row : pixels){
             for(Tiles.PixelValue pixel : row){
@@ -33,6 +32,14 @@ public class Tile {
             }
         }
         return array;
+    }
+
+    int getRows(){
+        return 8;
+    }
+
+    int getCols(){
+        return 8;
     }
 
 }

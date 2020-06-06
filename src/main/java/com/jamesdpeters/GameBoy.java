@@ -24,14 +24,14 @@ public class GameBoy {
 //            display.tick();
 //        }
 
-        Scanner scanner = new Scanner(System.in);
+
 
         CPU cpu = new CPU();
         cpu.getRegisters().totalCycles += 4;
         int steps =0;
 
         boolean debugStep = false;
-        Display display = new Display();
+        Display display = new Display(cpu);
 
 
         while(true) {
@@ -47,7 +47,7 @@ public class GameBoy {
                     display.setTile(row,col,tile);
                 }
                 display.draw();
-                scanner.nextLine();
+                //Utils.waitForInput();
             }
 //            if(cpu.getRegisters().totalCycles >= 230412){
 //                break;

@@ -1,6 +1,10 @@
 package com.jamesdpeters;
 
+import java.util.Scanner;
+
 public class Utils {
+
+    static Scanner scanner = new Scanner(System.in);
 
     public static String byteToString(byte b){
         return "0x"+Integer.toHexString(b & 0xFF);
@@ -29,7 +33,7 @@ public class Utils {
     public static byte[] IntToByte(int[] ints){
         byte[] bytes = new byte[ints.length];
         for (int i=0; i<ints.length; i++){
-            bytes[i] = (byte) ints[i];
+            bytes[i] = (byte) (ints[i] & 0xFF);
         }
         return bytes;
     }
@@ -37,5 +41,13 @@ public class Utils {
     public static int getBit(int byte_, int position)
     {
         return (byte_ >> position) & 1;
+    }
+
+    public static int setBit(int byte_, int position, boolean bool){
+        return byte_ | (bool ? 1:0) << position;
+    }
+
+    public static void waitForInput(){
+        scanner.nextLine();
     }
 }

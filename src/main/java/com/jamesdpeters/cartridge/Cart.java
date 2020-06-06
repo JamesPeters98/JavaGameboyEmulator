@@ -28,9 +28,10 @@ public class Cart {
         }
     }
 
-    private String getTitle(){
+    public String getTitle(){
         int[] title = Arrays.copyOfRange(rom,titleRange[0],titleRange[1]);
-        return new String(Utils.IntToByte(title), StandardCharsets.UTF_8);
+        byte[] titleBytes = Utils.IntToByte(title);
+        return new String(titleBytes, StandardCharsets.UTF_8);
     }
 
 

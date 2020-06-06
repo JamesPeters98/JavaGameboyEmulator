@@ -1,8 +1,9 @@
 package com.jamesdpeters.memory;
 
 import com.jamesdpeters.Utils;
+import com.jamesdpeters.gpu.registers.LCDControl;
+import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.gpu.Tiles;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 public class GetterSetter {
 
@@ -29,6 +30,7 @@ public class GetterSetter {
         this.getter = getter;
         this.setter = setter;
     }
+
 
     public static final GetterSetter VRAM = new GetterSetter(
             MemoryBus.Bank::getDirectByte,
@@ -80,9 +82,13 @@ public class GetterSetter {
             Tiles.setColorPalette(value);
         }
 
-        //LCDC (LCD Control Register)
+        //LCDControl (LCD Control Register)
         if(address == 0x40){
+            LCDControl.set(value);
+        }
 
+        if(address == 0x41){
+            LCDStatus.set(value);
         }
 //        System.out.println("SETTING IO REGISTER ADDRESS: "+ Utils.intToString(address)+" to value: "+Utils.intToString(value));
         bank.setDirectByte(address,value);

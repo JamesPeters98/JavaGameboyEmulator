@@ -1,5 +1,7 @@
 package com.jamesdpeters.gpu;
 
+import com.jamesdpeters.cpu.CPU;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,6 +12,7 @@ public class Display {
     JFrame frame;
     JPanel panel;
     BufferedImage image;
+    CPU cpu;
 
     public final double FPS = 59.73;
     public final double FRAME = TimeUnit.SECONDS.toNanos(1)/FPS;
@@ -21,7 +24,8 @@ public class Display {
 
     private double currentFPS;
 
-    public Display(){
+    public Display(CPU cpu){
+        this.cpu = cpu;
         frame = new JFrame();
         panel = new JPanel();
 
@@ -36,6 +40,7 @@ public class Display {
         frame.setResizable(true);
         frame.setVisible(true);
         frame.pack();
+        frame.setTitle(cpu.getCart().getTitle());
 
         panel.getGraphics().drawImage(image,0,0,WIDTH,HEIGHT,null);
     }
