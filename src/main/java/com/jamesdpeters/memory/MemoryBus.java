@@ -61,7 +61,7 @@ public class MemoryBus {
             System.arraycopy(memory,0,this.memory,0,memory.length);
         }
 
-        int getDirectByte(int address){
+        public int getDirectByte(int address){
 //            try {
                 return memory[address];
 //            } catch (ArrayIndexOutOfBoundsException e){

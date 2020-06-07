@@ -38,9 +38,9 @@ public class LCDStatus extends LCDRegister {
 
     public static void set(int b){
         instance.setByte(b);
-        System.out.println();
-        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
-        Utils.waitForInput();
+//        System.out.println();
+//        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
+//        Utils.waitForInput();
     }
 
     @Override

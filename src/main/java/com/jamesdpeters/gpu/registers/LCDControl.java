@@ -8,10 +8,10 @@ public class LCDControl extends LCDRegister {
 
     public static void set(int b){
         instance.setByte(b);
-        System.out.println();
-        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
-        System.out.println(instance);
-        Utils.waitForInput();
+//        System.out.println();
+//        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
+//        System.out.println(instance);
+//        Utils.waitForInput();
     }
 
     @Override

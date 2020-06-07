@@ -13,7 +13,7 @@ public class Tiles {
         THREE, //11
         ERROR;
 
-        private Color color;
+        private Color color = WHITE;
         public void setColor(Color color){this.color = color;}
         public int getRGB(){
             return color.getRGB();
@@ -53,6 +53,16 @@ public class Tiles {
             tileMap.put(tileIndex, tile);
         }
         tile.setPixel(rowIndex, pixelIndex, pixelValue);
+    }
+
+    public static PixelValue getTilePixel(int tileIndex, int rowIndex, int pixelIndex){
+        if(tileMap != null){
+            Tile tile = tileMap.get(tileIndex);
+            if(tile != null){
+                return tile.getPixel(rowIndex,pixelIndex);
+            }
+        }
+        return PixelValue.ZERO;
     }
 
     public static Collection<Tile> getTiles(){

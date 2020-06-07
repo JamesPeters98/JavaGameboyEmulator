@@ -47,12 +47,13 @@ public class Display {
 
     public void setPixel(int row, int col, int colour){
         image.setRGB(col,row,colour);
-        draw();
+        System.out.println("Setting Pixel row: "+row+" col: "+col+" colour: "+colour);
+//        draw();
     }
 
     public void setPixels(int[] pixels){
         image.setRGB(0,0, WIDTH,HEIGHT,pixels,0,WIDTH);
-        draw();
+//        draw();
     }
 
     public void setTile(int rowIndex, int colIndex, Tile tile){

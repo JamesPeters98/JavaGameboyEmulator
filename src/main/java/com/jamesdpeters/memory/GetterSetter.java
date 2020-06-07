@@ -74,7 +74,8 @@ public class GetterSetter {
         if(address == 0x50) {
             System.out.println("Boot Rom Enabled: "+(value != 1));
             MemoryBus.isBootRomEnabled = (value != 1);
-            System.exit(-1);
+            System.out.println();
+//            System.exit(-1);
         }
 
         // BGP - BG Palette Data (R/W)

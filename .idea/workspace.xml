@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="57f64b17-bc98-4f4d-8e38-ea97b06c5449" name="Default Changelist" comment="" />
+    <list default="true" id="57f64b17-bc98-4f4d-8e38-ea97b06c5449" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/GameBoy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/GameBoy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Display.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Display.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/GPU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/GPU.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tiles.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tiles.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDControl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDControl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/GetterSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/GetterSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/MemoryBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/MemoryBus.java" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -16,8 +40,13 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1cPyu9d6HuOHtWbg34TrLaqLv0a" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
@@ -30,11 +59,14 @@
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="com.jamesdpeters.cpu.InstructionBuilder" />
     </key>
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="cpu" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\James\Documents\GitHub\gameboyemulator\src\main\resources" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.jamesdpeters.exceptions" />
+    </key>
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="cpu" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -91,11 +123,26 @@
       <updated>1590444742967</updated>
       <workItem from="1590444748311" duration="46383000" />
       <workItem from="1590604265737" duration="12880000" />
-      <workItem from="1590771619210" duration="8401000" />
+      <workItem from="1590771619210" duration="55714000" />
+      <workItem from="1591282659688" duration="17099000" />
+      <workItem from="1591469591089" duration="6863000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
