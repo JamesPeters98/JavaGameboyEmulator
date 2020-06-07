@@ -1,5 +1,9 @@
 package com.jamesdpeters.gpu;
 
+import com.jamesdpeters.Utils;
+
+import java.util.Arrays;
+
 public class Tile {
 
     private int index;
@@ -19,7 +23,9 @@ public class Tile {
     }
 
     public Tiles.PixelValue getPixel(int rowIndex, int pixelIndex){
-        return pixels[rowIndex][pixelIndex];
+        Tiles.PixelValue pixel = pixels[rowIndex][pixelIndex];
+        if(pixel != null) return pixel;
+        return Tiles.PixelValue.ZERO;
     }
 
     public int[] getRGBArray(){

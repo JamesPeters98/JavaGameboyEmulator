@@ -3,16 +3,8 @@ package com.jamesdpeters;
 import com.jamesdpeters.cpu.CPU;
 import com.jamesdpeters.gpu.Display;
 import com.jamesdpeters.gpu.GPU;
-import com.jamesdpeters.gpu.Tile;
-import com.jamesdpeters.gpu.Tiles;
 import com.jamesdpeters.memory.MemoryBus;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
-import java.util.Random;
-import java.util.Scanner;
 
 public class GameBoy {
 
@@ -33,21 +25,40 @@ public class GameBoy {
 
         boolean debugStep = false;
         Display display = new Display(cpu);
+        display.start();
+//        Display displayTileMap = new Display(cpu);
+//        displayTileMap.setDimensions(160,300);
+//        displayTileMap.setTitle("TileMap");
         GPU gpu = new GPU(display);
 
         while(true) {
+//            if(cpu.getRegisters().pc == 0x0072){
+//                System.out.println(cpu.getRegisters());
+//                System.out.println("Line Y: "+ LCDValues.getLineY()+" Scroll Count: "+LCDValues.getScrollY());
+////                debugStep = true;
+//                Utils.waitForInput();
+//            }
+//            if(LCDValues.getLineY() >= 153 || debugStep) {
+//                System.out.println(cpu.getRegisters());
+//                System.out.println("Line Y: "+ LCDValues.getLineY()+" Scroll Count: "+LCDValues.getScrollY());
+////                debugStep = true;
+//                Utils.waitForInput();
+//            }
+
 //            if(cpu.getRegisters().pc == 0x0042 || debugStep){
 //                debugStep = true;
 //
-//                int tiles = 0;
 //                for(Tile tile : Tiles.getTiles()){
-//                    tiles++;
-//                    if(tiles > 360) break;
 //                    int row = (tile.getIndex() / 20);
 //                    int col = tile.getIndex() % 20;
-//                    display.setTile(row,col,tile);
+//                    try {
+//                        displayTileMap.setTile(row, col, tile);
+//                    } catch (ArrayIndexOutOfBoundsException e){
+//                        e.printStackTrace();
+//                        System.err.println("Row: "+row+" Col: "+col);
+//                    }
 //                }
-//                display.draw();
+//                displayTileMap.draw();
 //                //Utils.waitForInput();
 //            }
 //            if(cpu.getRegisters().totalCycles >= 230412){
@@ -57,13 +68,28 @@ public class GameBoy {
 //                System.out.println("Steps: "+steps);
 //                System.out.println(cpu.getRegisters());
 //            }
+
+//            if(!MemoryBus.isBootRomEnabled){
+//                System.out.println("Bootrom finished!");
+////                System.out.println(MemoryBus.Bank.VRAM.toByteString());
+////                try (FileOutputStream stream = new FileOutputStream("outputs/VRAM")) {
+////                    stream.write(MemoryBus.Bank.VRAM.toBytes());
+////                } catch (IOException e) {
+////                    e.printStackTrace();
+////                }
+//                Utils.waitForInput();
+//            }
+            if(!MemoryBus.isBootRomEnabled){
+                System.out.println(cpu.getRegisters());
+                Utils.waitForInput();
+            }
             int cycle = cpu.step();
             gpu.step(cycle);
+//            display.tick();
 
             steps++;
         }
 
-        //System.out.println(MemoryBus.Bank.HIGH_RAM.toByteString());
 
 
 //        while(true){

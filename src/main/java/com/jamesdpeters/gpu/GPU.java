@@ -1,9 +1,11 @@
 package com.jamesdpeters.gpu;
 
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.memory.MemoryBus;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 public class GPU {
 
@@ -58,7 +60,8 @@ public class GPU {
                     if(LCDValues.getLineY() > 143){
                         //Enter VBlank
                         LCDStatus.setMode(LCDStatus.Mode.VERTICAL_BLANKING_PERIOD_1);
-                        display.draw();
+//                        display.tick();
+//                        display.draw();
                     } else {
                         LCDStatus.setMode(LCDStatus.Mode.SEARCHING_OAM_RAM_2);
                     }
@@ -85,6 +88,77 @@ public class GPU {
     }
 
     private void renderScan(){
+        //Which section of VRAM to use.
+        int bgOffset = LCDControl.isBgCodeAreaSelection() ? 0x9C00 : 0x9800;
+
+        int bgX = LCDValues.getScrollX() / 0x08;
+        int bgY = (LCDValues.getScrollY() + LCDValues.getLineY()) % 0x100;
+        int mapAddress = bgOffset + (bgY / 0x08) * 0x20;
+
+        int tile = MemoryBus.getByte(mapAddress+bgX);
+//        System.out.println("MapAdr: "+Utils.intToString(mapAddress) + " bgX: "+bgX+" bgY: "+bgY+" Line Y: "+LCDValues.getLineY());
+        int line = bgY % 0x08;
+
+        boolean isTileIDSigned = LCDControl.isBgCharacterDataSelection();
+//        int tileDataAddress = isTileIDSigned ? 0 : 0x1000;
+        if(!isTileIDSigned) tile += 256;
+
+        int x = LCDValues.getScrollX() & 7;
+
+//        int tileData1 = getTile(tile,line,0, tileDataAddress, isTileIDSigned);
+//        int tileData2 = getTile(tile,line,1, tileDataAddress, isTileIDSigned);
+
+        for(int i=0; i < 160; i++){
+//            System.out.println("Getting tile: "+tile+" line: "+line+" tileX: "+x+" bgY: "+bgY);
+            Tiles.PixelValue pixelValue = Tiles.getTilePixel(tile,line,x);
+//            System.out.print("| tile="+tile+" line="+line+" x="+x+" ");
+            if(pixelValue == null) {
+                System.err.println("NULL tile: "+tile+" line: "+line+" tileX: "+x+" bgY: "+bgY);
+            }
+            display.setPixel(
+                            LCDValues.getLineY(), i,
+                            pixelValue.getRGB());
+
+            x++;
+            if(x == 8){
+                x=0;
+                bgX = (bgX + 1) & 0x1F;
+                int adr = mapAddress + bgX;
+                tile = MemoryBus.getByte(adr);
+
+//                System.out.println("Next Tile: "+Utils.intToString(adr));
+                if(adr >= 0x9900 && adr <= 0x9930){
+//                    System.out.println("Adr: "+Utils.intToString(adr)+" Tile: "+tile);
+//                    Utils.waitForInput();
+                }
+//                if(LCDControl.isBgCharacterDataSelection() && tile < 0x80) tile += 0x100;
+            }
+        }
+//        if(LCDControl.isLcdControllerOperation()) Utils.waitForInput();
+    }
+
+    private int getTile(int tileId, int line, int byteOffset, int tileDataAddress, boolean signed){
+        int tileIndex;
+        if(signed){
+            tileIndex = tileDataAddress + toSigned(tileId) * 0x10;
+        } else {
+            tileIndex = tileDataAddress + tileId * 0x10;
+        }
+
+//        Tile tile = Tiles.get
+
+        return MemoryBus.getByte(tileIndex + line * 2 + byteOffset);
+    }
+
+    public static int toSigned(int byteValue) {
+        if ((byteValue & (1 << 7)) == 0) {
+            return byteValue;
+        } else {
+            return byteValue - 0x100;
+        }
+    }
+
+    private void renderScanOld(){
         //Which section of VRAM to use.
         int bgOffset = LCDControl.isBgCodeAreaSelection() ? 0x1C00 : 0x1800;
 

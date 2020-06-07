@@ -14,7 +14,8 @@ public class MemoryBus {
         BOOT_ROM(0x00,0xFF,GetterSetter.DEFAULT,true),
         ROM(0x00, 0x7FFF,GetterSetter.DEFAULT,true),
         WORKING_RAM(0xC000, 0xDFFF),
-        VRAM(0x8000,0x9FFF, GetterSetter.VRAM,false),
+        VRAM(0x8000,0x97FF, GetterSetter.VRAM,false),
+        BACKGROUND_MAP(0x9800, 0x9FFF),
         IO_REGISTERS(0xFF00, 0xFF7F, GetterSetter.IOREGISTER,false),
         HIGH_RAM(0xFF80, 0xFFFE),
         INTERRUPT(0xFFFF, 0xFFFF);
@@ -83,9 +84,17 @@ public class MemoryBus {
             return builder.toString();
         }
 
+        public byte[] toBytes(){
+            byte[] bytes = new byte[memory.length];
+            for(int i=0; i<memory.length; i++){
+                bytes[i] = (byte) memory[i];
+            }
+            return bytes;
+        }
+
         /*
-                STATIC HELPER METHODS
-                 */
+            STATIC HELPER METHODS
+         */
         static Bank getMemory(int address){
 
             if(isBootRomEnabled && address <= BOOT_ROM.endAddress){

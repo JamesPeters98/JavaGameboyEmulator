@@ -1,73 +1,103 @@
 package com.jamesdpeters.gpu;
 
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.CPU;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-public class Display {
+public class Display extends Canvas implements Runnable {
 
     JFrame frame;
-    JPanel panel;
+//    JPanel panel;
     BufferedImage image;
     CPU cpu;
+    Thread thread;
+
 
     public final double FPS = 59.73;
     public final double FRAME = TimeUnit.SECONDS.toNanos(1)/FPS;
-    public final int WIDTH = 160;
-    public final int HEIGHT = 144;
+    public int WIDTH = 160;
+    public int HEIGHT = 144;
 
     private long cpuTime = 0;
     private long lastTime = 0;
+    private String title;
 
     private double currentFPS;
 
+    public int[] pixels;
+
     public Display(CPU cpu){
         this.cpu = cpu;
+
         frame = new JFrame();
-        panel = new JPanel();
+//        frame.setUndecorated(true);
+//        frame.getRootPane().setWindowDecorationStyle( JRootPane. FRAME );
 
-        image = new BufferedImage(WIDTH,HEIGHT, BufferedImage.TYPE_INT_RGB);
-
-        Dimension d = new Dimension(3*WIDTH,3*HEIGHT);
-        frame.setSize(d);
-        frame.setPreferredSize(d);
-        frame.add(panel);
-
-
+//        panel = new JPanel();
+        setDimensions(WIDTH,HEIGHT);
+//        frame.add(panel);
+        frame.add(this);
+        frame.pack();
         frame.setResizable(true);
         frame.setVisible(true);
-        frame.pack();
-        frame.setTitle(cpu.getCart().getTitle());
+        setTitle(cpu.getCart().getTitle());
 
-        panel.getGraphics().drawImage(image,0,0,WIDTH,HEIGHT,null);
+//        panel.getGraphics().drawImage(image,0,0,WIDTH,HEIGHT,null);
+    }
+
+    public void setDimensions(int width, int height){
+        this.HEIGHT = height;
+        this.WIDTH = width;
+        Dimension d = new Dimension(3*WIDTH,3*HEIGHT);
+//        panel.setSize(d);
+        setPreferredSize(d);
+
+        image = new BufferedImage(WIDTH,HEIGHT, BufferedImage.TYPE_INT_RGB);
+        pixels = new int[width*height];
+    }
+
+    public void setTitle(String title){
+        this.title = title;
+        frame.setTitle(title);
     }
 
     public void setPixel(int row, int col, int colour){
-        image.setRGB(col,row,colour);
-//        System.out.println("Setting Pixel row: "+row+" col: "+col+" colour: "+colour);
-//        draw();
+        pixels[row*WIDTH+col] = colour;
     }
 
     public void setPixels(int[] pixels){
         image.setRGB(0,0, WIDTH,HEIGHT,pixels,0,WIDTH);
-//        draw();
     }
 
     public void setTile(int rowIndex, int colIndex, Tile tile){
-        //System.out.println("Setting tile: "+rowIndex+","+colIndex);
         int[] pixels = tile.getRGBArray();
         image.setRGB(colIndex*8, rowIndex*8, 8, 8, pixels, 0, 8);
     }
 
     public void draw(){
-        Image resized = image.getScaledInstance(frame.getWidth(),frame.getHeight(),Image.SCALE_DEFAULT);
-        panel.getGraphics().drawImage(resized,0,0,frame.getWidth(),frame.getHeight(),null);
+        BufferStrategy bs = getBufferStrategy();
+        if(bs == null){
+            createBufferStrategy(4);
+            return;
+        }
+        bs.show();
+
+        Graphics g = bs.getDrawGraphics();
+        setPixels(pixels);
+        g.drawImage(image,0,0,getWidth(),getHeight(),null);
+        g.dispose();
+//        setPixels(pixels);
+//        Image resized = image.getScaledInstance(panel.getWidth(),panel.getHeight(),Image.SCALE_DEFAULT);
+//        panel.getGraphics().drawImage(resized,0,0,panel.getWidth(),panel.getHeight(),null);
     }
 
-    public void tick(){
+    private void tick(){
         long delta = delta();
         cpuTime += delta;
         if(cpuTime >= FRAME){
@@ -76,17 +106,6 @@ public class Display {
         }
     }
 
-//    private void runFrame(){
-//        Random random = new Random();
-//
-//        int[] pixels = new int[HEIGHT*WIDTH];
-//        for(int pixel=0; pixel < pixels.length; pixel++){
-//            pixels[pixel] = random.nextInt(16777216);
-//        }
-//
-//        setPixels(pixels);
-//    }
-
     private long delta(){
         long current = System.nanoTime();
         long result = (current - lastTime);
@@ -94,4 +113,15 @@ public class Display {
         return result;
     }
 
+    public void start(){
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    @Override
+    public void run() {
+        while(true){
+            tick();
+        }
+    }
 }
