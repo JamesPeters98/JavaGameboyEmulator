@@ -58,7 +58,7 @@ public class MemoryBus {
         }
 
         void setMemory(int[] memory){
-            System.arraycopy(memory,0,this.memory,0,memory.length);
+            System.arraycopy(memory,0,this.memory,0,this.memory.length);
         }
 
         public int getDirectByte(int address){

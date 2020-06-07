@@ -105,7 +105,6 @@ public class GPU {
 //            System.out.println("Getting Pixel at x: "+x+" y: "+y+" tile: "+tile);
             Tiles.PixelValue pixelValue = Tiles.getTilePixel(tile,y,x);
             if(pixelValue == null) pixelValue = Tiles.PixelValue.ERROR;
-//            System.out.println("PixelValue: "+pixelValue.toString());
             display
                     .setPixel(
                             LCDValues

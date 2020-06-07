@@ -47,7 +47,7 @@ public class Display {
 
     public void setPixel(int row, int col, int colour){
         image.setRGB(col,row,colour);
-        System.out.println("Setting Pixel row: "+row+" col: "+col+" colour: "+colour);
+//        System.out.println("Setting Pixel row: "+row+" col: "+col+" colour: "+colour);
 //        draw();
     }
 

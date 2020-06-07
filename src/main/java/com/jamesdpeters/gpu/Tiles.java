@@ -15,6 +15,11 @@ public class Tiles {
 
         private Color color = WHITE;
         public void setColor(Color color){this.color = color;}
+
+        public Color getColor() {
+            return color;
+        }
+
         public int getRGB(){
             return color.getRGB();
         }

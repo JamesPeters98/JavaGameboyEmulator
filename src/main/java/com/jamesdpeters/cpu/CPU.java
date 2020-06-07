@@ -30,7 +30,7 @@ public class CPU {
 
     public CPU(){
         registers = new Registers();
-        cart = new Cart("tetris.gb");
+        cart = new Cart("cpu_instrs.gb");
         MemoryBus.setROM(cart.rom);
         MemoryBus.setBootROM(BootRom.GAMEBOY_CLASSIC);
         state = State.RUNNING;
