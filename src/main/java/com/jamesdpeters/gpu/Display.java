@@ -36,26 +36,20 @@ public class Display extends Canvas implements Runnable {
         this.cpu = cpu;
 
         frame = new JFrame();
-//        frame.setUndecorated(true);
-//        frame.getRootPane().setWindowDecorationStyle( JRootPane. FRAME );
 
-//        panel = new JPanel();
         setDimensions(WIDTH,HEIGHT);
-//        frame.add(panel);
         frame.add(this);
         frame.pack();
         frame.setResizable(true);
         frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(cpu.getCart().getTitle());
-
-//        panel.getGraphics().drawImage(image,0,0,WIDTH,HEIGHT,null);
     }
 
     public void setDimensions(int width, int height){
         this.HEIGHT = height;
         this.WIDTH = width;
         Dimension d = new Dimension(3*WIDTH,3*HEIGHT);
-//        panel.setSize(d);
         setPreferredSize(d);
 
         image = new BufferedImage(WIDTH,HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -90,11 +84,9 @@ public class Display extends Canvas implements Runnable {
 
         Graphics g = bs.getDrawGraphics();
         setPixels(pixels);
+        g.setColor(Color.WHITE);
         g.drawImage(image,0,0,getWidth(),getHeight(),null);
         g.dispose();
-//        setPixels(pixels);
-//        Image resized = image.getScaledInstance(panel.getWidth(),panel.getHeight(),Image.SCALE_DEFAULT);
-//        panel.getGraphics().drawImage(resized,0,0,panel.getWidth(),panel.getHeight(),null);
     }
 
     private void tick(){

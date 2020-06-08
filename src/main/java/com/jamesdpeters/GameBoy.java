@@ -5,96 +5,53 @@ import com.jamesdpeters.gpu.Display;
 import com.jamesdpeters.gpu.GPU;
 import com.jamesdpeters.memory.MemoryBus;
 
+import java.util.concurrent.TimeUnit;
 
-public class GameBoy {
+
+public class GameBoy implements Runnable {
 
     public final static boolean VERBOSE = false;
 
-    public static void main(String[] args) {
-//        Display display = new Display();
-//
-//        while(true){
-//            display.tick();
-//        }
+    public Thread thread;
+    public boolean running = true;
 
+    private CPU cpu;
+    private GPU gpu;
+    private Display display;
 
+    public static GameBoy instance;
+    public long startTime;
 
-        CPU cpu = new CPU();
+    public GameBoy(){
+        cpu = new CPU();
         cpu.getRegisters().totalCycles += 4;
-        int steps =0;
 
         boolean debugStep = false;
-        Display display = new Display(cpu);
+        display = new Display(cpu);
         display.start();
-//        Display displayTileMap = new Display(cpu);
-//        displayTileMap.setDimensions(160,300);
-//        displayTileMap.setTitle("TileMap");
-        GPU gpu = new GPU(display);
+        gpu = new GPU(display);
 
-        while(true) {
-//            if(cpu.getRegisters().pc == 0x0072){
-//                System.out.println(cpu.getRegisters());
-//                System.out.println("Line Y: "+ LCDValues.getLineY()+" Scroll Count: "+LCDValues.getScrollY());
-////                debugStep = true;
-//                Utils.waitForInput();
-//            }
-//            if(LCDValues.getLineY() >= 153 || debugStep) {
-//                System.out.println(cpu.getRegisters());
-//                System.out.println("Line Y: "+ LCDValues.getLineY()+" Scroll Count: "+LCDValues.getScrollY());
-////                debugStep = true;
-//                Utils.waitForInput();
-//            }
+        thread = new Thread(this);
+    }
 
-//            if(cpu.getRegisters().pc == 0x0042 || debugStep){
-//                debugStep = true;
-//
-//                for(Tile tile : Tiles.getTiles()){
-//                    int row = (tile.getIndex() / 20);
-//                    int col = tile.getIndex() % 20;
-//                    try {
-//                        displayTileMap.setTile(row, col, tile);
-//                    } catch (ArrayIndexOutOfBoundsException e){
-//                        e.printStackTrace();
-//                        System.err.println("Row: "+row+" Col: "+col);
-//                    }
-//                }
-//                displayTileMap.draw();
-//                //Utils.waitForInput();
-//            }
-//            if(cpu.getRegisters().totalCycles >= 230412){
-//                break;
-//            }
-//            if(steps % 1000 == 0){
-//                System.out.println("Steps: "+steps);
-//                System.out.println(cpu.getRegisters());
-//            }
+    public static void main(String[] args) {
+        instance = new GameBoy();
+        instance.thread.start();
+    }
 
-//            if(!MemoryBus.isBootRomEnabled){
-//                System.out.println("Bootrom finished!");
-////                System.out.println(MemoryBus.Bank.VRAM.toByteString());
-////                try (FileOutputStream stream = new FileOutputStream("outputs/VRAM")) {
-////                    stream.write(MemoryBus.Bank.VRAM.toBytes());
-////                } catch (IOException e) {
-////                    e.printStackTrace();
-////                }
-//                Utils.waitForInput();
-//            }
+    @Override
+    public void run() {
+        startTime = System.nanoTime();
+        while(running){
             if(!MemoryBus.isBootRomEnabled){
                 System.out.println(cpu.getRegisters());
+                long timeTaken = System.nanoTime() - startTime;
+                double clockSpeed = ((double) cpu.getRegisters().totalCycles / (Math.pow(10,-9)*timeTaken));
+                System.out.println("Average Clock Speed: "+clockSpeed);
                 Utils.waitForInput();
             }
             int cycle = cpu.step();
             gpu.step(cycle);
-//            display.tick();
-
-            steps++;
         }
-
-
-
-//        while(true){
-//            display.tick();
-//        }
-
     }
 }
