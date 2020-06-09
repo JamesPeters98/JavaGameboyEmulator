@@ -105,8 +105,8 @@ public class InstructionBuilder {
         //LDH
         if(b == 0xe0) return Instruction.LDH.setLoadType(RegisterBank.A, RegisterBank.A8);
         if(b == 0xf0) return Instruction.LDH.setLoadType(RegisterBank.A8, RegisterBank.A);
-        if(b == 0xe2) return Instruction.LDH.setLoadType(RegisterBank.A, RegisterBank.C_POINTER);
-        if(b == 0xf2) return Instruction.LDH.setLoadType(RegisterBank.C_POINTER, RegisterBank.A);
+        if(b == 0xe2) return Instruction.LD.setLoadType(RegisterBank.A, RegisterBank.C_POINTER);
+        if(b == 0xf2) return Instruction.LD.setLoadType(RegisterBank.C_POINTER, RegisterBank.A);
 
         //CP
         if(b == 0xfe) return Instruction.CP.setLoadType(RegisterBank.D8,RegisterBank.A);

@@ -8,6 +8,8 @@ import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.memory.MemoryBus;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
+import java.util.concurrent.locks.LockSupport;
+
 public class GPU {
 
     private final int OAM_FRAME_TIME = 80;
@@ -35,6 +37,10 @@ public class GPU {
         if(isWaitingForFrame && frameClock < TOTAL_FRAME_TIME){
             return;
         }
+//        else if(isWaitingForFrame){
+//            syncClockSpeed();
+//            isWaitingForFrame = false;
+//        }
         if(!LCDControl.isLcdControllerOperation()){
             LCDValues.setLineY(0);
             lastFrameTime = System.nanoTime();
@@ -65,6 +71,7 @@ public class GPU {
                     if(LCDValues.getLineY() > 143){
                         //Enter VBlank
                         LCDStatus.setMode(LCDStatus.Mode.VERTICAL_BLANKING_PERIOD_1);
+                        display.run();
                     } else {
                         LCDStatus.setMode(LCDStatus.Mode.SEARCHING_OAM_RAM_2);
                     }
@@ -73,7 +80,6 @@ public class GPU {
 
             case VERTICAL_BLANKING_PERIOD_1:
                 if(frameClock >= VBLANK_FRAME_TIME){
-                    frameClock -= VBLANK_FRAME_TIME;
                     LCDValues.incrementLineY();
 
                     if(LCDValues.getLineY() > 153){
@@ -81,6 +87,7 @@ public class GPU {
                         LCDValues.setLineY(0);
                         syncClockSpeed();
                     }
+                    frameClock -= VBLANK_FRAME_TIME;
                 }
                 break;
 
@@ -126,19 +133,31 @@ public class GPU {
 
     private void syncClockSpeed(){
 //        System.out.println("New Frame: clock="+frameClock);
+        long clockTime = Math.round(Math.pow(10,9)*((double) frameClock/CLOCKSPEED));
+
         long now = System.nanoTime();
         long frameTime = now - lastFrameTime;
-        double clockTime = Math.pow(10,9)*((double) frameClock/CLOCKSPEED);
         if(frameTime < clockTime){
-            double time = (clockTime-frameTime)*Math.pow(10,-6);
+            long time = (clockTime-frameTime);
+
+            busyWaitMicros(time);
 //            System.out.println("Sleeping: "+time+" ms");
-            try {
-                Thread.sleep(Math.round(time));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(0, (int) Math.round(time));
+//                LockSupport.parkNanos(time+1000000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
         }
-        lastFrameTime = now;
+        lastFrameTime = System.nanoTime();
+    }
+
+    private static void busyWaitMicros(long nano){
+        long waitUntil = System.nanoTime() + nano;
+        while(waitUntil > System.nanoTime()){
+            ;
+        }
     }
 
 

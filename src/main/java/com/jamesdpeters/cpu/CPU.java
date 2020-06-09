@@ -9,6 +9,9 @@ import com.jamesdpeters.exceptions.UnknownInstructionException;
 import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
 import com.jamesdpeters.memory.MemoryBus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CPU {
 
     public enum State{
@@ -28,6 +31,10 @@ public class CPU {
     Cart cart;
     State state;
 
+    private List<Integer> testedCodes;
+    private List<Integer> testedPrefixCodes;
+    public boolean haveTested;
+
     public CPU(){
         registers = new Registers();
         cart = new Cart("tetris.gb");
@@ -36,6 +43,9 @@ public class CPU {
         state = State.RUNNING;
         //setInitialConditions();
         System.out.print(registers);
+
+        testedCodes = new ArrayList<>();
+        testedPrefixCodes = new ArrayList<>();
     }
 
     public int step(){
@@ -49,11 +59,22 @@ public class CPU {
                 if(GameBoy.VERBOSE) {
                     if(instructionByte == 0xCB){
                         int instructionByteNext = MemoryBus.getByte(registers.pc);
+                        if(testedPrefixCodes.contains(instructionByte)){
+                            haveTested = true;
+                        } else {
+                            haveTested = false;
+                            testedPrefixCodes.add(instructionByte);
+                        }
                         System.out.println(" | Next Instruction: 0xCB -> "+Utils.intToString(instructionByteNext) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
                     } else {
+                        if(testedCodes.contains(instructionByte)){
+                            haveTested = true;
+                        } else {
+                            haveTested = false;
+                            testedCodes.add(instructionByte);
+                        }
                         System.out.println(" | Next Instruction: " + Utils.intToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: " + cycle);
                     }
-                    System.out.print(registers);
                 }
                 return cycle;
             } catch (UnknownInstructionException | UnknownPrefixInstructionException e) {

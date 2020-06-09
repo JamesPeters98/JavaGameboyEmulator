@@ -10,7 +10,7 @@ public enum Instruction {
     NOP((cpu, instruction) -> {
         instruction.setInstructionName("NOP");
         cpu.getRegisters().pc++;
-        return 0;
+        return CPU.CPUCYCLE_1;
     }),
 
     HALT((cpu, instruction) -> {
@@ -34,9 +34,11 @@ public enum Instruction {
         cpu.getRegisters().pc++;
 
         instruction.setInstructionName("LD "+target.getId()+","+source.getId());
-        if(source == RegisterBank.HLI || source == RegisterBank.D8) return CPU.CPUCYCLE_2;
-        if(source == RegisterBank.A16) return CPU.CPUCYCLE_4;
-        return CPU.CPUCYCLE_1;
+        int cpuCycles = CPU.CPUCYCLE_1;
+        if(source == RegisterBank.HLI || source == RegisterBank.D8 || source == RegisterBank.C_POINTER) cpuCycles += CPU.CPUCYCLE_1;
+        if(target == RegisterBank.HLI || target == RegisterBank.D8 || target == RegisterBank.C_POINTER) cpuCycles += CPU.CPUCYCLE_1;
+        if(source == RegisterBank.A16 || target == RegisterBank.A16) cpuCycles += CPU.CPUCYCLE_3;
+        return cpuCycles;
     }),
 
     LD_16((cpu, instruction) -> {
@@ -294,9 +296,9 @@ public enum Instruction {
         instruction.setInstructionName("JR "+instruction.getJumpCondition()+",(r8)");
         if(instruction.getJumpCondition().isMet(cpu)) {
             cpu.getRegisters().pc++;
-            int e = MemoryBus.getByte(cpu.getRegisters().pc);
+            byte e = (byte) MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
-            cpu.getRegisters().pc = ((cpu.getRegisters().pc+e) & 0xff);
+            cpu.getRegisters().pc = ((cpu.getRegisters().pc+e) & 0xffff);
 
             return CPU.CPUCYCLE_3;
         } else {

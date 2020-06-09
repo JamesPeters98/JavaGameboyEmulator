@@ -16,12 +16,13 @@ public class Cart {
     static int entryPoint = 0x0100;
 
     public int[] rom;
+    private byte[] byteRom;
 
     public Cart(String romName){
         try {
             File file = new File(classLoader.getResource(romName).getFile());
-            byte[] rom = Files.readAllBytes(file.toPath());
-            this.rom = Utils.ByteToInt(rom);
+            byteRom = Files.readAllBytes(file.toPath());
+            rom = Utils.ByteToInt(byteRom);
             System.out.println("Loading ROM: "+getTitle());
         } catch (IOException e) {
             e.printStackTrace();
@@ -29,9 +30,8 @@ public class Cart {
     }
 
     public String getTitle(){
-        int[] title = Arrays.copyOfRange(rom,titleRange[0],titleRange[1]);
-        byte[] titleBytes = Utils.IntToByte(title);
-        return new String(titleBytes, StandardCharsets.UTF_8);
+        byte[] title = Arrays.copyOfRange(byteRom,titleRange[0],titleRange[1]);
+        return new String(title, StandardCharsets.UTF_8).trim();
     }
 
 

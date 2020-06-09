@@ -12,11 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 public class Display extends Canvas implements Runnable {
 
-    JFrame frame;
-//    JPanel panel;
+    final JFrame frame;
     BufferedImage image;
     CPU cpu;
-    Thread thread;
 
 
     public final double FPS = 59.73;
@@ -36,20 +34,22 @@ public class Display extends Canvas implements Runnable {
         this.cpu = cpu;
 
         frame = new JFrame();
-
         setDimensions(WIDTH,HEIGHT);
         frame.add(this);
         frame.pack();
         frame.setResizable(true);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle(cpu.getCart().getTitle());
+        title = cpu.getCart().getTitle();
+//        setTitle(cpu.getCart().getTitle());
+
+
     }
 
     public void setDimensions(int width, int height){
         this.HEIGHT = height;
         this.WIDTH = width;
-        Dimension d = new Dimension(3*WIDTH,3*HEIGHT);
+        Dimension d = new Dimension(2*WIDTH,2*HEIGHT);
         setPreferredSize(d);
 
         image = new BufferedImage(WIDTH,HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -59,6 +59,11 @@ public class Display extends Canvas implements Runnable {
     public void setTitle(String title){
         this.title = title;
         frame.setTitle(title);
+    }
+
+    //Set FPS in title
+    public void setFPS(double fps){
+        frame.setTitle(title+" FPS: " + Math.round(fps));
     }
 
     public void setPixel(int row, int col, int colour){
@@ -74,7 +79,7 @@ public class Display extends Canvas implements Runnable {
         image.setRGB(colIndex*8, rowIndex*8, 8, 8, pixels, 0, 8);
     }
 
-    public void draw(){
+    private void draw(){
         BufferStrategy bs = getBufferStrategy();
         if(bs == null){
             createBufferStrategy(4);
@@ -89,14 +94,14 @@ public class Display extends Canvas implements Runnable {
         g.dispose();
     }
 
-    private void tick(){
-        long delta = delta();
-        cpuTime += delta;
-        if(cpuTime >= FRAME){
-            cpuTime = 0;
-            draw();
-        }
-    }
+//    private void tick(){
+//        long delta = delta();
+//        cpuTime += delta;
+//        if(cpuTime >= FRAME){
+//            cpuTime = 0;
+//            draw();
+//        }
+//    }
 
     private long delta(){
         long current = System.nanoTime();
@@ -105,15 +110,19 @@ public class Display extends Canvas implements Runnable {
         return result;
     }
 
-    public void start(){
-        thread = new Thread(this);
-        thread.start();
-    }
+//    public void start(){
+//        thread = new Thread(this);
+//        thread.start();
+//    }
 
     @Override
     public void run() {
-        while(true){
-            tick();
-        }
+        draw();
+        double FPS = Math.pow(10,9)/delta();
+        setFPS(FPS);
+//        System.out.println("FPS: "+FPS);
+//        while(true){
+//            tick();
+//        }
     }
 }

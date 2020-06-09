@@ -46,7 +46,11 @@ public class MemoryBus {
         }
 
         void set(int address, int value) throws ReadOnlyException {
-            if(readonly) throw new ReadOnlyException(this, address, value);
+            if(readonly){
+                //Tetris actually tries to write to ROM so just ignore writes to ROM.
+                return;
+                //throw new ReadOnlyException(this, address, value);
+            }
             getterSetter.set(this, index(address), value);
         }
 

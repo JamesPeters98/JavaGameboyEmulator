@@ -10,10 +10,12 @@ import java.util.concurrent.TimeUnit;
 
 public class GameBoy implements Runnable {
 
-    public final static boolean VERBOSE = false;
+    public static boolean VERBOSE = false;
 
     public Thread thread;
     public boolean running = true;
+
+
 
     private CPU cpu;
     private GPU gpu;
@@ -28,7 +30,6 @@ public class GameBoy implements Runnable {
 
         boolean debugStep = false;
         display = new Display(cpu);
-        display.start();
         gpu = new GPU(display);
 
         thread = new Thread(this);
@@ -43,15 +44,29 @@ public class GameBoy implements Runnable {
     public void run() {
         startTime = System.nanoTime();
         while(running){
+
+//            Utils.waitForInput();
+//            System.out.println(cpu.getRegisters());
+
             if(!MemoryBus.isBootRomEnabled){
+                VERBOSE = true;
                 System.out.println(cpu.getRegisters());
                 long timeTaken = System.nanoTime() - startTime;
                 double clockSpeed = ((double) cpu.getRegisters().totalCycles / (Math.pow(10,-9)*timeTaken));
                 System.out.println("Average Clock Speed: "+clockSpeed);
+                System.out.println("Instructions: "+cpu.getRegisters().totalCycles);
+                System.out.println("Average Clock Speed: "+timeTaken+" ns");
                 Utils.waitForInput();
             }
+
             int cycle = cpu.step();
             gpu.step(cycle);
+
+//            if(!cpu.haveTested) {
+//                System.out.println();
+//                System.out.println(cpu.getRegisters());
+//                Utils.waitForInput();
+//            }
         }
     }
 }
