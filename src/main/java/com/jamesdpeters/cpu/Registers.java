@@ -3,7 +3,7 @@ package com.jamesdpeters.cpu;
 import com.jamesdpeters.Utils;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-public class Registers {
+public class Registers implements Cloneable{
     int a,b,c,d,e,h,l; //Registers
 
     public short sp; //Stack pointer
@@ -134,5 +134,9 @@ public class Registers {
         return this;
     }
 
-
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        f = (FlagsRegister) f.clone();
+        return super.clone();
+    }
 }

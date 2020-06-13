@@ -2,6 +2,7 @@ package com.jamesdpeters.gpu;
 
 import com.jamesdpeters.GameBoy;
 import com.jamesdpeters.Utils;
+import com.jamesdpeters.cpu.Interrupts;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.gpu.registers.LCDStatus;
@@ -22,42 +23,46 @@ public class GPU {
     private final double FRAME_TIME = Math.pow(10,9)*TOTAL_FRAME_TIME/CLOCKSPEED; /** Amount of time each frame should take in nano seconds. **/
 
     private long lastFrameTime;
+    private boolean realtime;
 
     private Display display;
-    public GPU(Display display){
+    public GPU(Display display, boolean realtime){
         this.display = display;
+        this.realtime = realtime;
     }
 
     private static int frameClock = 0;
+    private static int totalFrameClock = 0;
     private boolean isWaitingForFrame = false;
 
     public void step(int delta){
         frameClock += delta;
+        totalFrameClock += delta;
 
-        if(isWaitingForFrame && frameClock < TOTAL_FRAME_TIME){
-            return;
-        }
-//        else if(isWaitingForFrame){
-//            syncClockSpeed();
-//            isWaitingForFrame = false;
+//        if(isWaitingForFrame && frameClock < TOTAL_FRAME_TIME){
+//            return;
 //        }
-        if(!LCDControl.isLcdControllerOperation()){
-            LCDValues.setLineY(0);
-            lastFrameTime = System.nanoTime();
-            isWaitingForFrame = true;
-        }
+////        else if(isWaitingForFrame){
+////            syncClockSpeed();
+////            isWaitingForFrame = false;
+////        }
+//        if(!LCDControl.isLcdControllerOperation()){
+//            LCDValues.setLineY(0);
+//            lastFrameTime = System.nanoTime();
+//            isWaitingForFrame = true;
+//        }
 
         switch (LCDStatus.getMode()){
             case SEARCHING_OAM_RAM_2:
                 if(frameClock >= OAM_FRAME_TIME){
-                    frameClock -= OAM_FRAME_TIME;
+                    frameClock = 0;
                     LCDStatus.setMode(LCDStatus.Mode.TRANSFERRING_DATA_TO_LCD_3);
                 }
                 break;
 
             case TRANSFERRING_DATA_TO_LCD_3:
                 if(frameClock >= TRANSFER_FRAME_TIME){
-                    frameClock -= TRANSFER_FRAME_TIME;
+                    frameClock =0;
                     LCDStatus.setMode(LCDStatus.Mode.HORIZONTAL_BLANK_PERIOD_0);
                     renderScan();
                 }
@@ -65,13 +70,15 @@ public class GPU {
 
             case HORIZONTAL_BLANK_PERIOD_0:
                 if(frameClock >= HBLANK_FRAME_TIME){
-                    frameClock -= HBLANK_FRAME_TIME;
+                    frameClock =0;
                     LCDValues.incrementLineY();
 
                     if(LCDValues.getLineY() > 143){
                         //Enter VBlank
                         LCDStatus.setMode(LCDStatus.Mode.VERTICAL_BLANKING_PERIOD_1);
+                        Interrupts.V_BLANK.request();
                         display.run();
+                        GameBoy.instance.backgroundMap.run();
                     } else {
                         LCDStatus.setMode(LCDStatus.Mode.SEARCHING_OAM_RAM_2);
                     }
@@ -84,10 +91,13 @@ public class GPU {
 
                     if(LCDValues.getLineY() > 153){
                         LCDStatus.setMode(LCDStatus.Mode.SEARCHING_OAM_RAM_2);
+                        Interrupts.V_BLANK.removeRequest();
                         LCDValues.setLineY(0);
                         syncClockSpeed();
+//                        frameClock = 0;
                     }
-                    frameClock -= VBLANK_FRAME_TIME;
+//                    frameClock -= VBLANK_FRAME_TIME;
+                    frameClock = 0;
                 }
                 break;
 
@@ -132,23 +142,15 @@ public class GPU {
     }
 
     private void syncClockSpeed(){
-//        System.out.println("New Frame: clock="+frameClock);
-        long clockTime = Math.round(Math.pow(10,9)*((double) frameClock/CLOCKSPEED));
-
-        long now = System.nanoTime();
-        long frameTime = now - lastFrameTime;
-        if(frameTime < clockTime){
-            long time = (clockTime-frameTime);
-
-            busyWaitMicros(time);
-//            System.out.println("Sleeping: "+time+" ms");
-//            try {
-//                Thread.sleep(0, (int) Math.round(time));
-//                LockSupport.parkNanos(time+1000000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-
+        if(realtime) {
+            long clockTime = Math.round(Math.pow(10, 9) * ((double) totalFrameClock / CLOCKSPEED));
+            long now = System.nanoTime();
+            long frameTime = now - lastFrameTime;
+            if (frameTime < clockTime) {
+                long time = (clockTime - frameTime);
+                busyWaitMicros(time);
+                totalFrameClock = 0;
+            }
         }
         lastFrameTime = System.nanoTime();
     }

@@ -8,6 +8,8 @@ import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
 import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
 import com.jamesdpeters.memory.MemoryBus;
+import com.jamesdpeters.monitoring.CPUCycle;
+import com.jamesdpeters.monitoring.Monitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +33,18 @@ public class CPU {
     Cart cart;
     State state;
 
-    private List<Integer> testedCodes;
-    private List<Integer> testedPrefixCodes;
+    public List<Integer> testedCodes;
+    public List<Integer> testedPrefixCodes;
     public boolean haveTested;
+
+    public boolean scheduleIME = false;
 
     public CPU(){
         registers = new Registers();
         cart = new Cart("tetris.gb");
+//        cart = new Cart();
         MemoryBus.setROM(cart.rom);
-        MemoryBus.setBootROM(BootRom.GAMEBOY_CLASSIC);
+        MemoryBus.setBootROM(BootRom.GAMEBOY_CLASSIC_CHECKSUM);
         state = State.RUNNING;
         //setInitialConditions();
         System.out.print(registers);
@@ -52,31 +57,9 @@ public class CPU {
         if(state == State.HALT) return 0;
         if(state == State.RUNNING) {
             try {
-                int instructionByte = MemoryBus.getByte(registers.pc);
-                Instruction instruction = InstructionBuilder.fromByteNotPrefixed(this,instructionByte);
-                int cycle = instruction.run(this);
-                getRegisters().totalCycles += cycle;
-                if(GameBoy.VERBOSE) {
-                    if(instructionByte == 0xCB){
-                        int instructionByteNext = MemoryBus.getByte(registers.pc);
-                        if(testedPrefixCodes.contains(instructionByte)){
-                            haveTested = true;
-                        } else {
-                            haveTested = false;
-                            testedPrefixCodes.add(instructionByte);
-                        }
-                        System.out.println(" | Next Instruction: 0xCB -> "+Utils.intToString(instructionByteNext) + " (" + instruction.getInstructionName() + ") - CPU Cycles: "+cycle);
-                    } else {
-                        if(testedCodes.contains(instructionByte)){
-                            haveTested = true;
-                        } else {
-                            haveTested = false;
-                            testedCodes.add(instructionByte);
-                        }
-                        System.out.println(" | Next Instruction: " + Utils.intToString(instructionByte) + " (" + instruction.getInstructionName() + ") - CPU Cycles: " + cycle);
-                    }
-                }
-                return cycle;
+                CPUCycle cycle = new CPUCycle(this);
+                Monitor.addCycle(cycle);
+                return cycle.run();
             } catch (UnknownInstructionException | UnknownPrefixInstructionException e) {
                 System.out.println();
                 e.printStackTrace();

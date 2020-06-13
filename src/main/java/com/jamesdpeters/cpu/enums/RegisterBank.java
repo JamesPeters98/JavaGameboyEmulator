@@ -111,7 +111,7 @@ public enum RegisterBank {
      * @param cpu the CPU.
      * @param value to set.
      */
-    void setValue(CPU cpu, int value){
+    public void setValue(CPU cpu, int value){
         setMethod.set(cpu,value);
     }
 
@@ -120,7 +120,7 @@ public enum RegisterBank {
      * @param cpu the register bank for the CPU.
      * @return value of the given register.
      */
-    int getValue(CPU cpu){
+    public int getValue(CPU cpu){
         return getMethod.get(cpu);
     }
 

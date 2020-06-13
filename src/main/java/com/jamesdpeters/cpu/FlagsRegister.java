@@ -1,6 +1,6 @@
 package com.jamesdpeters.cpu;
 
-public class FlagsRegister {
+public class FlagsRegister implements Cloneable{
 
     public boolean ZERO;
     public boolean SUBTRACT;
@@ -46,4 +46,8 @@ public class FlagsRegister {
                 "----";
     }
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

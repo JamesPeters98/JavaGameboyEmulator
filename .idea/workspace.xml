@@ -2,12 +2,29 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="57f64b17-bc98-4f4d-8e38-ea97b06c5449" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/Joypad.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/Interrupts.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/registers/IE.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/registers/IF.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/monitoring/CPUCycle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/monitoring/Monitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/BootRom.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/BootRom.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/GameBoy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/GameBoy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cartridge/Cart.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cartridge/Cart.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/CPU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/CPU.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/FlagsRegister.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/FlagsRegister.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/InstructionBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/InstructionBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/Registers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/Registers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/enums/Instruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/enums/Instruction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/enums/RegisterBank.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/cpu/enums/RegisterBank.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/exceptions/UnknownInstructionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/exceptions/UnknownInstructionException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Display.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Display.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/GPU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/GPU.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tile.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tiles.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/Tiles.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDControl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDControl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDRegister.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/registers/ByteRegister.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/gpu/registers/LCDStatus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/GetterSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/GetterSetter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/MemoryBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jamesdpeters/memory/MemoryBus.java" afterDir="false" />
@@ -31,6 +48,9 @@
     </option>
     <expand />
     <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="gameboyemulator" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -63,6 +83,7 @@
       <recent name="C:\Users\James\Documents\GitHub\gameboyemulator\src\main\resources" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.jamesdpeters.cpu.registers" />
       <recent name="com.jamesdpeters.exceptions" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
@@ -103,6 +124,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.BinaryTests" />
+      <item itemvalue="Application.Cart" />
+      <item itemvalue="Application.GameBoy" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.GameBoy" />
@@ -126,6 +152,7 @@
       <workItem from="1590771619210" duration="55714000" />
       <workItem from="1591282659688" duration="17099000" />
       <workItem from="1591469591089" duration="6863000" />
+      <workItem from="1591786501659" duration="42050000" />
     </task>
     <servers />
   </component>
@@ -144,5 +171,8 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/gameboyemulator$GameBoy.ic" NAME="GameBoy Coverage Results" MODIFIED="1591554121504" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>

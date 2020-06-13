@@ -1,8 +1,8 @@
 package com.jamesdpeters.gpu.registers;
 
-import com.jamesdpeters.Utils;
+import com.jamesdpeters.registers.ByteRegister;
 
-public class LCDControl extends LCDRegister {
+public class LCDControl extends ByteRegister {
 
     private static LCDControl instance = new LCDControl();
 
@@ -15,7 +15,7 @@ public class LCDControl extends LCDRegister {
     }
 
     @Override
-    int getAddress() {
+    public int getAddress() {
         return 0xFF40;
     }
 

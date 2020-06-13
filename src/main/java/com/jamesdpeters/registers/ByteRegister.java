@@ -1,11 +1,13 @@
-package com.jamesdpeters.gpu.registers;
+package com.jamesdpeters.registers;
 
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.memory.MemoryBus;
 
-public abstract class LCDRegister {
+import java.util.Arrays;
 
-    boolean[] bits = new boolean[8];
+public abstract class ByteRegister {
+
+    public boolean[] bits = new boolean[8];
 
     public void setByte(int register){
         for(int b=0; b<8; b++){
@@ -13,13 +15,13 @@ public abstract class LCDRegister {
         }
     }
 
-    abstract int getAddress();
+    public abstract int getAddress();
 
     /**
      * Must be called after updating a flag.
      * Pushes the register to memory.
      */
-    void pushRegister(){
+    public void pushRegister(){
         int byte_ = 0;
         for(int b=0; b<8; b++){
             byte_ = Utils.setBit(byte_,b,bits[b]);
@@ -27,4 +29,8 @@ public abstract class LCDRegister {
         MemoryBus.writeByte(getAddress(),byte_);
     }
 
+    @Override
+    public String toString() {
+        return Arrays.toString(bits);
+    }
 }

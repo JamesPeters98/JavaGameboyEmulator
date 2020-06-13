@@ -33,7 +33,8 @@ public class Tile {
         int index = 0;
         for(Tiles.PixelValue[] row : pixels){
             for(Tiles.PixelValue pixel : row){
-                array[index] = pixel.getRGB();
+                if(pixel == null) array[index] = Tiles.PixelValue.ZERO.getRGB();
+                else array[index] = pixel.getRGB();
                 index++;
             }
         }

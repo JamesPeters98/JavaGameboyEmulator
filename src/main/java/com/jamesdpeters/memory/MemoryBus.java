@@ -1,5 +1,6 @@
 package com.jamesdpeters.memory;
 
+import com.jamesdpeters.GameBoy;
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.exceptions.ReadOnlyException;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
@@ -16,9 +17,12 @@ public class MemoryBus {
         WORKING_RAM(0xC000, 0xDFFF),
         VRAM(0x8000,0x97FF, GetterSetter.VRAM,false),
         BACKGROUND_MAP(0x9800, 0x9FFF),
+        //TODO Still Memory Mappings to add here.
+        SPRITE_TABLE(0xFE00, 0xFE9F),
+        UNUSEABLE(0xFEA0, 0xFEFF, GetterSetter.UNUSEABLE, false),
         IO_REGISTERS(0xFF00, 0xFF7F, GetterSetter.IOREGISTER,false),
-        HIGH_RAM(0xFF80, 0xFFFE),
-        INTERRUPT(0xFFFF, 0xFFFF);
+        HIGH_RAM(0xFF80, 0xFFFE, GetterSetter.HRAM, false),
+        INTERRUPT(0xFFFF, 0xFFFF, GetterSetter.INTERRUPTS, false);
 
         private int[] memory;
         private final int startAddress, endAddress;
@@ -63,7 +67,13 @@ public class MemoryBus {
         }
 
         void setMemory(int[] memory){
-            System.arraycopy(memory,0,this.memory,0,this.memory.length);
+            System.arraycopy(
+                    memory,
+                    0,
+                    this.memory,
+                    0,
+                    memory
+                            .length);
         }
 
         public int getDirectByte(int address){
@@ -76,7 +86,7 @@ public class MemoryBus {
 //            }
 //            return 0;
         }
-        void setDirectByte(int address, int value){
+        public void setDirectByte(int address, int value){
             memory[address] = value;
         }
 
@@ -115,6 +125,7 @@ public class MemoryBus {
                         return bank;
                     }
                 }
+                System.out.println(GameBoy.getCpu().getRegisters());
             throw new ArrayIndexOutOfBoundsException("No Memory Bank Implemented For Address: 0x"+Integer.toHexString(address));
         }
 

@@ -70,6 +70,11 @@ public class Tiles {
         return PixelValue.ZERO;
     }
 
+    public static Tile getTile(int tileIndex){
+        if(tileMap != null) return tileMap.get(tileIndex);
+        return null;
+    }
+
     public static Collection<Tile> getTiles(){
         return tileMap.values();
     }

@@ -1,6 +1,6 @@
 package com.jamesdpeters.gpu.registers;
 
-import com.jamesdpeters.Utils;
+import com.jamesdpeters.registers.ByteRegister;
 
 import java.util.Arrays;
 
@@ -18,7 +18,7 @@ import java.util.Arrays;
  *             2: During Searching OAM-RAM
  *             3: During Transferring Data to LCD Driver
  */
-public class LCDStatus extends LCDRegister {
+public class LCDStatus extends ByteRegister {
 
     /**
      * 00: Enable CPU access to all display RAM
@@ -44,7 +44,7 @@ public class LCDStatus extends LCDRegister {
     }
 
     @Override
-    int getAddress() {
+    public int getAddress() {
         return 0xFF41;
     }
 

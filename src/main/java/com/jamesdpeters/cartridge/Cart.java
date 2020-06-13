@@ -18,6 +18,8 @@ public class Cart {
     public int[] rom;
     private byte[] byteRom;
 
+    private boolean noROM = false;
+
     public Cart(String romName){
         try {
             File file = new File(classLoader.getResource(romName).getFile());
@@ -29,7 +31,14 @@ public class Cart {
         }
     }
 
+    public Cart(){
+        noROM = true;
+        rom = new int[256];
+        System.out.println("No ROM loaded");
+    }
+
     public String getTitle(){
+        if(noROM) return "No ROM";
         byte[] title = Arrays.copyOfRange(byteRom,titleRange[0],titleRange[1]);
         return new String(title, StandardCharsets.UTF_8).trim();
     }
