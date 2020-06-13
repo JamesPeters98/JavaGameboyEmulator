@@ -19,10 +19,9 @@ public class CPUCycle {
     private int cycleAmount;
     private String instructionName;
 //    private int totalCycles;
-
     private Registers registerCopy;
-
     private CPU cpu;
+    private FlagsRegister flags;
 
     public CPUCycle(CPU cpu){
         this.cpu = cpu;
@@ -30,6 +29,10 @@ public class CPUCycle {
 
     public Registers getRegister() {
         return registerCopy;
+    }
+
+    public FlagsRegister getFlags() {
+        return flags;
     }
 
     public int getPc() {
@@ -61,8 +64,8 @@ public class CPUCycle {
     public int run() throws UnknownInstructionException, UnknownPrefixInstructionException {
         int instructionByte = MemoryBus.getByte(cpu.getRegisters().pc);
         Instruction instruction = InstructionBuilder.fromByteNotPrefixed(cpu,instructionByte);
-        instructionName = instruction.getInstructionName();
         cycleAmount = instruction.run(cpu);
+        instructionName = instruction.getInstructionName();
         cpu.getRegisters().totalCycles += cycleAmount;
 
             if(instructionByte == 0xCB){
@@ -95,9 +98,11 @@ public class CPUCycle {
 
         try {
             registerCopy = (Registers) cpu.getRegisters().clone();
+            flags = (FlagsRegister) cpu.getRegisters().getF().clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
+
 
         return cycleAmount;
     }

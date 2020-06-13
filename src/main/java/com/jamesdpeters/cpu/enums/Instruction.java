@@ -38,10 +38,11 @@ public enum Instruction {
     LD((cpu, instruction) -> {
         RegisterBank source = instruction.getLoadType().source;
         RegisterBank target = instruction.getLoadType().target;
-        target.setValue(cpu,source.getValue(cpu) & 0xFF);
+        int sourceVal = source.getValue(cpu) & 0xFF;
+        target.setValue(cpu,sourceVal);
         cpu.getRegisters().pc++;
 
-        instruction.setInstructionName("LD "+target.getId()+" "+source.getId());
+        instruction.setInstructionName("LD "+target.getId()+" "+source.getId() +" ["+Utils.intToString(sourceVal)+"]");
         int cpuCycles = CPU.CPUCYCLE_1;
         if(source == RegisterBank.HLI || source == RegisterBank.D8 || source == RegisterBank.C_POINTER) cpuCycles += CPU.CPUCYCLE_1;
         if(target == RegisterBank.HLI || target == RegisterBank.D8 || target == RegisterBank.C_POINTER) cpuCycles += CPU.CPUCYCLE_1;
@@ -52,8 +53,9 @@ public enum Instruction {
     LD_16((cpu, instruction) -> {
         RegisterBank source = instruction.getLoadType().source;
         RegisterBank target = instruction.getLoadType().target;
-        target.setValue(cpu,source.getValue(cpu) & 0xFFFF);
-        instruction.setInstructionName("LD "+target.getId()+" "+source.getId());
+        int sourceVal = source.getValue(cpu) & 0xFFFF;
+        target.setValue(cpu,sourceVal);
+        instruction.setInstructionName("LD "+target.getId()+" "+source.getId()+" ["+Utils.intToString(sourceVal)+"]");
         cpu.getRegisters().pc++;
         if(target == RegisterBank.A16 || source == RegisterBank.A16) return CPU.CPUCYCLE_4;
         return CPU.CPUCYCLE_3;
@@ -65,7 +67,7 @@ public enum Instruction {
         RegisterBank target = instruction.getLoadType().target;
         int sourceVal = source.getValue(cpu) & 0xFF;
         target.setValue(cpu,sourceVal);
-        instruction.setInstructionName("LD "+target.getId()+" "+source.getId());
+        instruction.setInstructionName("LD "+target.getId()+" "+source.getId()+" ["+Utils.intToString(sourceVal)+"]");
         cpu.getRegisters().pc++;
         return CPU.CPUCYCLE_2;
     }),
@@ -85,7 +87,7 @@ public enum Instruction {
         cpu.getRegisters().getF().SUBTRACT = true;
         cpu.getRegisters().getF().CARRY = b2 > b1;
         cpu.getRegisters().getF().HALF_CARRY = (0x0f & b2) > (0x0f & b1);
-        instruction.setInstructionName("CP "+instruction.getLoadType().target.getId()+" "+instruction.getLoadType().source.getId());
+        instruction.setInstructionName("CP "+instruction.getLoadType().target.getId()+" "+instruction.getLoadType().source.getId()+ " ["+Utils.intToString(b2)+"]");
 
         cpu.getRegisters().pc++;
         if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
@@ -318,11 +320,11 @@ public enum Instruction {
             int lsb = MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
             int msb = MemoryBus.getByte(cpu.getRegisters().pc);
-            cpu.getRegisters().pc = (short) (msb << 8 | lsb);
+            cpu.getRegisters().pc = (msb << 8 | lsb) & 0xFFFF;
 
             return CPU.CPUCYCLE_4;
         } else {
-            cpu.getRegisters().pc = (short) (cpu.getRegisters().pc+3);
+            cpu.getRegisters().pc = (cpu.getRegisters().pc+3) & 0xFFFF;
             return CPU.CPUCYCLE_3;
         }
     }),
@@ -339,6 +341,7 @@ public enum Instruction {
             byte e = (byte) MemoryBus.getByte(cpu.getRegisters().pc);
             cpu.getRegisters().pc++;
             cpu.getRegisters().pc = ((cpu.getRegisters().pc+e) & 0xffff);
+            instruction.setInstructionName("JR "+instruction.getJumpCondition()+" (r8) ["+Utils.intToString(cpu.getRegisters().pc)+"]");
 
             return CPU.CPUCYCLE_3;
         } else {
@@ -438,7 +441,7 @@ public enum Instruction {
         cpu.getRegisters().getF().CARRY = (result) > 0xff;
         cpu.getRegisters().getF().HALF_CARRY = (byte1 & 0xF) + (byte2 & 0xF) > 0xF;
         cpu.getRegisters().setA((result) & 0xff);
-        instruction.setInstructionName("ADD "+instruction.getLoadType().target+","+instruction.getLoadType().source);
+        instruction.setInstructionName("ADD "+instruction.getLoadType().target+" "+instruction.getLoadType().source);
         cpu.getRegisters().pc++;
         if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
         return CPU.CPUCYCLE_1;
@@ -452,7 +455,7 @@ public enum Instruction {
         cpu.getRegisters().getF().CARRY = (result) > 0xffff;
         cpu.getRegisters().getF().HALF_CARRY = (n8 & 0xFF) + (HL & 0xFF) > 0xFF;
         cpu.getRegisters().setHL((result) & 0xffff);
-        instruction.setInstructionName("ADD HL,"+instruction.getRegisterBank());
+        instruction.setInstructionName("ADD HL "+instruction.getRegisterBank());
         cpu.getRegisters().pc++;
         return CPU.CPUCYCLE_2;
     }),

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class Monitor {
 
     public static final int START_CYCLE = 0;
-    public static final int END_CYCLE = 24350000;
+    public static final int END_CYCLE = 25350000;
 
     public static ArrayList<CPUCycle> cpuCycleList = new ArrayList<>();
 
@@ -40,7 +40,7 @@ public class Monitor {
         PrintWriter outputFile = getOutputFile(GameBoy.getCpu().getCart().getTitle()+".csv"); // this sends the output to file1
         if(outputFile != null) {
             // Write the file as a comma seperated file (.csv) so it can be read it into EXCEL
-            outputFile.println("Total Cycles, PC, OpCode, Instruction, Cycle Amount, A, B, C, D, E, F, H, L, SP, Z, N, H, C");
+            outputFile.println("Total Cycles, PC, OpCode, Instruction, Cycle Amount, A, B, C, D, E, H, L, SP, Flags, IME");
 
             cpuCycleList.forEach(cpuCycle -> {
                 String output = cpuCycle.getTotalCycles()+" , "+
@@ -55,10 +55,11 @@ public class Monitor {
                                 Utils.intToString(cpuCycle.getRegister().getC()) + ", " +
                                 Utils.intToString(cpuCycle.getRegister().getD()) + ", " +
                                 Utils.intToString(cpuCycle.getRegister().getE()) + ", " +
-                                cpuCycle.getRegister().getF() + ", " +
                                 Utils.intToString(cpuCycle.getRegister().getH()) + ", " +
                                 Utils.intToString(cpuCycle.getRegister().getL()) + ", " +
-                                Utils.intToString(cpuCycle.getRegister().sp) + ", ";
+                                Utils.intToString(cpuCycle.getRegister().sp) + ", "+
+                                cpuCycle.getFlags() + ", "+
+                                cpuCycle.getRegister().IME + ", ";
                 }
 
                 outputFile.println(output);
@@ -82,5 +83,4 @@ public class Monitor {
             return getOutputFile(filenamePath);
         }
     }
-//    public static
 }

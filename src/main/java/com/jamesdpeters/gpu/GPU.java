@@ -70,10 +70,10 @@ public class GPU {
 
             case HORIZONTAL_BLANK_PERIOD_0:
                 if(frameClock >= HBLANK_FRAME_TIME){
-                    frameClock =0;
+                    frameClock = 0;
                     LCDValues.incrementLineY();
 
-                    if(LCDValues.getLineY() > 143){
+                    if(LCDValues.getLineY() == 143){
                         //Enter VBlank
                         LCDStatus.setMode(LCDStatus.Mode.VERTICAL_BLANKING_PERIOD_1);
                         Interrupts.V_BLANK.request();
