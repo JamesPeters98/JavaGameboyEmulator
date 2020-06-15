@@ -44,7 +44,8 @@ public class Utils {
     }
 
     public static int setBit(int byte_, int position, boolean bool){
-        return byte_ | (bool ? 1:0) << position;
+        if(bool) return byte_ | 1 << position;
+        return byte_ & ~(1 << position);
     }
 
     public static void waitForInput(){

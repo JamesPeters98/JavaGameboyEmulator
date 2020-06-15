@@ -23,7 +23,9 @@ public class InstructionBuilder {
 
         //OPERATIONS AND BITWISE
         if(inHorizontalRange(b,  0x80,  0x87)) return horizontalLoadType(Instruction.ADD,  0x80, b, RegisterBank.A);
+        if(inHorizontalRange(b,  0x88,  0x8F)) return horizontalLoadType(Instruction.ADC,  0x88, b, RegisterBank.A);
         if(inHorizontalRange(b,  0x90,  0x97)) return horizontalLoadType(Instruction.SUB,  0x90, b, RegisterBank.A);
+        if(inHorizontalRange(b,  0x98,  0x9F)) return horizontalLoadType(Instruction.SBC,  0x98, b, RegisterBank.A);
         if(inHorizontalRange(b,  0xA0,  0xA7)) return horizontalLoadType(Instruction.AND,  0xA0, b, RegisterBank.A);
         if(inHorizontalRange(b,  0xB0,  0xB7)) return horizontalLoadType(Instruction.OR,  0xB0, b, RegisterBank.A);
         if(inHorizontalRange(b,  0xA8, 0xAF)) return horizontalLoadType(Instruction.XOR, 0xA8, b, RegisterBank.A);
@@ -34,6 +36,10 @@ public class InstructionBuilder {
         if(b == 0xD6) return Instruction.SUB.setLoadType(RegisterBank.D8,RegisterBank.A);
         if(b == 0xE6) return Instruction.AND.setLoadType(RegisterBank.D8,RegisterBank.A);
         if(b == 0xF6) return Instruction.OR.setLoadType(RegisterBank.D8,RegisterBank.A);
+        if(b == 0xCE) return Instruction.ADC.setLoadType(RegisterBank.D8,RegisterBank.A);
+        if(b == 0xDE) return Instruction.SBC.setLoadType(RegisterBank.D8,RegisterBank.A);
+        if(b == 0xEE) return Instruction.XOR.setLoadType(RegisterBank.D8,RegisterBank.A);
+        if(b == 0xFE) return Instruction.CP.setLoadType(RegisterBank.D8,RegisterBank.A);
 
         //HL ADD
         if(inVerticalRange(b,0x09,0x39)) return verticalTargetBCDEHLSP(Instruction.ADD_HL,0x09,b);
@@ -176,11 +182,14 @@ public class InstructionBuilder {
         if(inHorizontalRange(b,  0xB0,  0xB7)) return horizontalLoadType(Instruction.RES,  0xB0, b, null).setBit(6);
         if(inHorizontalRange(b,  0xB8,  0xBF)) return horizontalLoadType(Instruction.RES,  0xB8, b, null).setBit(7);
 
-        //RLC
+        //Rotate and Shifts
         if(inHorizontalRange(b,  0x00,  0x07)) return horizontalLoadType(Instruction.RLC,  0x0, b, null);
         if(inHorizontalRange(b,  0x10,  0x17)) return horizontalLoadType(Instruction.RL,  0x10, b, null);
         if(inHorizontalRange(b,  0x08,  0x0F)) return horizontalLoadType(Instruction.RRC,  0x08, b, null);
-        if(inHorizontalRange(b,  0x18,  0x1F)) return horizontalLoadType(Instruction.RRC,  0x18, b, null);
+        if(inHorizontalRange(b,  0x18,  0x1F)) return horizontalLoadType(Instruction.RR,  0x18, b, null);
+        if(inHorizontalRange(b,  0x20,  0x27)) return horizontalLoadType(Instruction.SLA,  0x20, b, null);
+        if(inHorizontalRange(b,  0x28,  0x2F)) return horizontalLoadType(Instruction.SRA,  0x28, b, null);
+        if(inHorizontalRange(b,  0x38,  0x3F)) return horizontalLoadType(Instruction.SRL,  0x38, b, null);
 
         //SWAP
         if(inHorizontalRange(b,  0x30,  0x37)) return horizontalLoadType(Instruction.SWAP,  0x30, b, null);

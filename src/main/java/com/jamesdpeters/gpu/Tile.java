@@ -1,20 +1,16 @@
 package com.jamesdpeters.gpu;
 
-import com.jamesdpeters.Utils;
-
-import java.util.Arrays;
-
 public class Tile {
 
     private int index;
-    private Tiles.PixelValue[][] pixels; //Row Index, Pixel Index
+    private PixelValue[][] pixels; //Row Index, Pixel Index
 
     public Tile(int index){
         this.index = index;
-        pixels = new Tiles.PixelValue[getRows()][getCols()];
+        pixels = new PixelValue[getRows()][getCols()];
     }
 
-    public void setPixel(int rowIndex, int pixelIndex, Tiles.PixelValue pixelValue){
+    public void setPixel(int rowIndex, int pixelIndex, PixelValue pixelValue){
         pixels[rowIndex][pixelIndex] = pixelValue;
     }
 
@@ -22,19 +18,19 @@ public class Tile {
         return index;
     }
 
-    public Tiles.PixelValue getPixel(int rowIndex, int pixelIndex){
-        Tiles.PixelValue pixel = pixels[rowIndex][pixelIndex];
+    public PixelValue getPixel(int rowIndex, int pixelIndex){
+        PixelValue pixel = pixels[rowIndex][pixelIndex];
         if(pixel != null) return pixel;
-        return Tiles.PixelValue.ZERO;
+        return PixelValue.ZERO;
     }
 
     public int[] getRGBArray(){
         int[] array = new int[getCols()*getRows()];
         int index = 0;
-        for(Tiles.PixelValue[] row : pixels){
-            for(Tiles.PixelValue pixel : row){
-                if(pixel == null) array[index] = Tiles.PixelValue.ZERO.getRGB();
-                else array[index] = pixel.getRGB();
+        for(PixelValue[] row : pixels){
+            for(PixelValue pixel : row){
+                if(pixel == null) array[index] = PixelValue.ZERO.getBgColor().getRGB();
+                else array[index] = pixel.getBgColor().getRGB();
                 index++;
             }
         }

@@ -1,15 +1,11 @@
 package com.jamesdpeters.gpu;
 
 import com.jamesdpeters.GameBoy;
-import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.Interrupts;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.memory.MemoryBus;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
-import java.util.concurrent.locks.LockSupport;
 
 public class GPU {
 
@@ -39,30 +35,30 @@ public class GPU {
         frameClock += delta;
         totalFrameClock += delta;
 
-//        if(isWaitingForFrame && frameClock < TOTAL_FRAME_TIME){
-//            return;
-//        }
-////        else if(isWaitingForFrame){
-////            syncClockSpeed();
-////            isWaitingForFrame = false;
-////        }
-//        if(!LCDControl.isLcdControllerOperation()){
-//            LCDValues.setLineY(0);
-//            lastFrameTime = System.nanoTime();
-//            isWaitingForFrame = true;
-//        }
+        if(isWaitingForFrame && frameClock < TOTAL_FRAME_TIME){
+            return;
+        }
+        else if(isWaitingForFrame){
+            syncClockSpeed();
+            isWaitingForFrame = false;
+        }
+        if(!LCDControl.isLcdControllerOperation()){
+            LCDValues.setLineY(0);
+            lastFrameTime = System.nanoTime();
+            isWaitingForFrame = true;
+        }
 
         switch (LCDStatus.getMode()){
             case SEARCHING_OAM_RAM_2:
                 if(frameClock >= OAM_FRAME_TIME){
-                    frameClock = 0;
+                    frameClock -= OAM_FRAME_TIME;
                     LCDStatus.setMode(LCDStatus.Mode.TRANSFERRING_DATA_TO_LCD_3);
                 }
                 break;
 
             case TRANSFERRING_DATA_TO_LCD_3:
                 if(frameClock >= TRANSFER_FRAME_TIME){
-                    frameClock =0;
+                    frameClock -= TRANSFER_FRAME_TIME;
                     LCDStatus.setMode(LCDStatus.Mode.HORIZONTAL_BLANK_PERIOD_0);
                     renderScan();
                 }
@@ -70,10 +66,10 @@ public class GPU {
 
             case HORIZONTAL_BLANK_PERIOD_0:
                 if(frameClock >= HBLANK_FRAME_TIME){
-                    frameClock = 0;
+                    frameClock -= HBLANK_FRAME_TIME;
                     LCDValues.incrementLineY();
 
-                    if(LCDValues.getLineY() == 143){
+                    if(LCDValues.getLineY() > 143){
                         //Enter VBlank
                         LCDStatus.setMode(LCDStatus.Mode.VERTICAL_BLANKING_PERIOD_1);
                         Interrupts.V_BLANK.request();
@@ -91,13 +87,11 @@ public class GPU {
 
                     if(LCDValues.getLineY() > 153){
                         LCDStatus.setMode(LCDStatus.Mode.SEARCHING_OAM_RAM_2);
-                        Interrupts.V_BLANK.removeRequest();
                         LCDValues.setLineY(0);
                         syncClockSpeed();
 //                        frameClock = 0;
                     }
-//                    frameClock -= VBLANK_FRAME_TIME;
-                    frameClock = 0;
+                    frameClock -= VBLANK_FRAME_TIME;
                 }
                 break;
 
@@ -125,9 +119,9 @@ public class GPU {
         int x = LCDValues.getScrollX() & 7;
 
         for(int i=0; i < 160; i++){
-            Tiles.PixelValue pixelValue = Tiles.getTilePixel(tile,line,x);
-            if(pixelValue == null) { pixelValue = Tiles.PixelValue.ERROR; }
-            display.setPixel(LCDValues.getLineY(), i, pixelValue.getRGB());
+            PixelValue pixelValue = Tiles.getTilePixel(tile,line,x);
+            if(pixelValue == null) { pixelValue = PixelValue.ZERO; }
+            display.setPixel(LCDValues.getLineY(), i, pixelValue.getBgColor().getRGB());
 
             x++;
             if(x == 8){

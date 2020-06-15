@@ -40,7 +40,7 @@ public class Display extends Canvas implements Runnable {
         init(WIDTH,HEIGHT);
         this.cpu = cpu;
         title = cpu.getCart().getTitle();
-        frame.addKeyListener(Joypad.instance);
+        addKeyListener(Joypad.instance);
     }
 
 

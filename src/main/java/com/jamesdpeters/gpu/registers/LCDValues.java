@@ -43,6 +43,7 @@ public class LCDValues {
         setLineY(getLineY()+1 & 0xFF);
     }
 
-
-
+    public static String getString() {
+        return String.format("LCDValues: LineY:d%d, ScrollY: %d, ScrollX: %d", getLineY(),getScrollY(),getScrollX());
+    }
 }

@@ -5,6 +5,7 @@ import com.jamesdpeters.gpu.Display;
 import com.jamesdpeters.gpu.GPU;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.Tiles;
+import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.memory.MemoryBus;
 import com.jamesdpeters.monitoring.Monitor;
 
@@ -53,13 +54,15 @@ public class GameBoy implements Runnable {
         startTime = System.nanoTime();
         while(running){
 
-//            if(!MemoryBus.isBootRomEnabled && !cpu.haveTested) {
-//                System.out.println("DEBUG MODE!");
-//                VERBOSE = true;
-//                debugStep = true;
-//                Utils.waitForInput();
-//                System.out.println(cpu.getRegisters());
-//            }
+
+            if(debugStep) {
+                System.out.println("DEBUG MODE!");
+                VERBOSE = true;
+                debugStep = true;
+                Utils.waitForInput();
+                System.out.println(cpu.getRegisters());
+                System.out.println(LCDValues.getString());
+            }
 
 //            if(!MemoryBus.isBootRomEnabled){
 //                VERBOSE = true;

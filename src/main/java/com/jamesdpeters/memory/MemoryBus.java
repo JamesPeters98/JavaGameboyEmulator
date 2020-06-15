@@ -143,11 +143,6 @@ public class MemoryBus {
         }
     }
 
-//    public MemoryBus(int[] gameROM){
-//        System.out.println("ROM SIZE: "+gameROM.length);
-//        Bank.ROM.setMemory(gameROM);
-//    }
-
     public static void setROM(int[] gameROM){
         System.out.println("ROM SIZE: "+gameROM.length);
         Bank.ROM.setMemory(gameROM);

@@ -1,6 +1,7 @@
 package com.jamesdpeters.cpu;
 
 import com.jamesdpeters.Utils;
+import com.jamesdpeters.gpu.registers.LCDValues;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 public class Registers implements Cloneable{

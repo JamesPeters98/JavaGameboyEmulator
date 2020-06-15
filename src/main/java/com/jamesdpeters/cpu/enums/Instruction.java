@@ -10,8 +10,8 @@ public enum Instruction {
     NOP((cpu, instruction) -> {
         instruction.setInstructionName("NOP");
         cpu.getRegisters().pc++;
-        return 0;
-//        return CPU.CPUCYCLE_1;
+//        return 0;
+        return CPU.CPUCYCLE_1;
     }),
 
     HALT((cpu, instruction) -> {
@@ -136,7 +136,6 @@ public enum Instruction {
 
         instruction.getLoadType().source.setValue(cpu,result);
 
-
         if(instruction.isClearZ()){
             flags.ZERO = false;
             instruction.setInstructionName("RR"+instruction.getLoadType().source.getId());
@@ -165,8 +164,6 @@ public enum Instruction {
         flags.SUBTRACT = false;
         cpu.getRegisters().pc++;
         instruction.getLoadType().source.setValue(cpu,result);
-
-
 
         if(instruction.isClearZ()){
             flags.ZERO = false;
@@ -207,6 +204,60 @@ public enum Instruction {
         return CPU.CPUCYCLE_2;
     }),
 
+    SLA((cpu, instruction) -> {
+        FlagsRegister flags = cpu.getRegisters().getF();
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
+        int result = (targetValue << 1) & 0xFF;
+        flags.CARRY = (targetValue & (1 << 7)) != 0;
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
+
+        cpu.getRegisters().pc++;
+        instruction.getLoadType().source.setValue(cpu,result);
+        instruction.setInstructionName("SLA "+instruction.getLoadType().source.getId());
+        cpu.getRegisters().pc++;
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
+    }),
+
+    SRA((cpu, instruction) -> {
+        FlagsRegister flags = cpu.getRegisters().getF();
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
+        int result =  (targetValue >> 1) | (targetValue & (1 << 7));
+        flags.CARRY = (targetValue & 1) != 0;
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
+
+        cpu.getRegisters().pc++;
+        instruction.getLoadType().source.setValue(cpu,result);
+        instruction.setInstructionName("SRA "+instruction.getLoadType().source.getId());
+        cpu.getRegisters().pc++;
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
+    }),
+
+    SRL((cpu, instruction) -> {
+        FlagsRegister flags = cpu.getRegisters().getF();
+        int targetValue = instruction.getLoadType().source.getValue(cpu);
+        int result =  (targetValue >> 1);
+        flags.CARRY = (targetValue & 1) != 0;
+        flags.ZERO = (result == 0);
+        flags.HALF_CARRY = false;
+        flags.SUBTRACT = false;
+
+        cpu.getRegisters().pc++;
+        instruction.getLoadType().source.setValue(cpu,result);
+        instruction.setInstructionName("SRL "+instruction.getLoadType().source.getId());
+        cpu.getRegisters().pc++;
+
+        if(instruction.getLoadType().source == RegisterBank.HLI) return CPU.CPUCYCLE_4;
+        return CPU.CPUCYCLE_2;
+    }),
+
     SET((cpu, instruction) -> {
         int bit = instruction.getBit();
         RegisterBank source = instruction.getLoadType().source;
@@ -240,7 +291,8 @@ public enum Instruction {
     RES((cpu, instruction) -> {
         int bit = instruction.getBit();
         RegisterBank source = instruction.getLoadType().source;
-        int result = Utils.setBit(source.getValue(cpu),bit,false);
+        int sourceVal = source.getValue(cpu) & 0xFF;
+        int result = Utils.setBit(sourceVal,bit,false);
         source.setValue(cpu,result);
         instruction.setInstructionName("RES "+bit+" "+source);
         cpu.getRegisters().pc++;
@@ -460,16 +512,48 @@ public enum Instruction {
         return CPU.CPUCYCLE_2;
     }),
 
+    ADC((cpu,instruction) -> {
+        int carry = cpu.getRegisters().getF().CARRY ? 1 : 0;
+        int byte1 = instruction.getLoadType().source.getValue(cpu);
+        int byte2 = instruction.getLoadType().target.getValue(cpu);
+        int result = (byte1+byte2+carry);
+        cpu.getRegisters().getF().ZERO = (result & 0xff) == 0;
+        cpu.getRegisters().getF().SUBTRACT = false;
+        cpu.getRegisters().getF().CARRY = (result) > 0xff;
+        cpu.getRegisters().getF().HALF_CARRY = (byte1 & 0xF) + (byte2 & 0xF) + carry > 0xF;
+        cpu.getRegisters().setA((result) & 0xff);
+        instruction.setInstructionName("ADC "+instruction.getLoadType().target+" "+instruction.getLoadType().source);
+        cpu.getRegisters().pc++;
+        if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
+        return CPU.CPUCYCLE_1;
+    }),
+
     SUB((cpu, instruction) -> {
         int byte1 = instruction.getLoadType().source.getValue(cpu);
         int byte2 = instruction.getLoadType().target.getValue(cpu);
         int result = byte2-byte1;
-        cpu.getRegisters().getF().ZERO = (result) == 0;
+        cpu.getRegisters().getF().ZERO = (result & 0xFF) == 0;
         cpu.getRegisters().getF().SUBTRACT = true;
         cpu.getRegisters().getF().CARRY = (byte1 > byte2);
         cpu.getRegisters().getF().HALF_CARRY = (0x0f & byte1) > (0x0f & byte2);
         cpu.getRegisters().setA(result & 0xff);
         instruction.setInstructionName("SUB "+instruction.getLoadType().target+" "+instruction.getLoadType().source);
+        cpu.getRegisters().pc++;
+        if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
+        return CPU.CPUCYCLE_1;
+    }),
+
+    SBC((cpu,instruction) -> {
+        int carry = cpu.getRegisters().getF().CARRY ? 1 : 0;
+        int byte1 = instruction.getLoadType().source.getValue(cpu);
+        int byte2 = instruction.getLoadType().target.getValue(cpu);
+        int result = byte2-byte1-carry;
+        cpu.getRegisters().getF().ZERO = (result) == 0;
+        cpu.getRegisters().getF().SUBTRACT = true;
+        cpu.getRegisters().getF().CARRY = result < 0;
+        cpu.getRegisters().getF().HALF_CARRY = ((byte2 ^ byte1 ^ (result & 0xff)) & (1 << 4)) != 0;
+        cpu.getRegisters().setA(result & 0xff);
+        instruction.setInstructionName("SBC "+instruction.getLoadType().target+" "+instruction.getLoadType().source);
         cpu.getRegisters().pc++;
         if(instruction.getLoadType().source == RegisterBank.HLI || instruction.getLoadType().source == RegisterBank.D8) return CPU.CPUCYCLE_2;
         return CPU.CPUCYCLE_1;

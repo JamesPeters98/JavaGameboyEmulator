@@ -1,5 +1,6 @@
 package com.jamesdpeters;
 
+import com.jamesdpeters.cpu.Interrupts;
 import com.jamesdpeters.memory.MemoryBus;
 import com.jamesdpeters.registers.ByteRegister;
 
@@ -11,48 +12,95 @@ public class Joypad extends ByteRegister implements KeyListener {
     public static Joypad instance = new Joypad();
 
     public enum Button {
-        START(5,3),
-        SELECT(5, 2),
-        A(5, 1),
-        B(5,0),
+        START(5,3, KeyEvent.VK_SHIFT),
+        SELECT(5, 2, KeyEvent.VK_CONTROL),
+        A(5, 1, KeyEvent.VK_ENTER),
+        B(5,0, KeyEvent.VK_DECIMAL),
 
-        UP(4,3),
-        DOWN(4,2),
-        LEFT(4,1),
-        RIGHT(4,0);
+        UP(4,3, KeyEvent.VK_UP),
+        DOWN(4,2, KeyEvent.VK_DOWN),
+        LEFT(4,1, KeyEvent.VK_LEFT),
+        RIGHT(4,0, KeyEvent.VK_RIGHT);
 
         private int selectBit, pressedBit;
         private boolean pressed = false;
-        Button(int selectBit, int pressedBit){
+        private int keyCode;
+        Button(int selectBit, int pressedBit, int defaultKeyCode){
             this.selectBit = selectBit;
             this.pressedBit = pressedBit;
+            this.keyCode = defaultKeyCode;
         }
 
-        private static int currentSelectedBit = 5;
+        private static boolean buttonSelected = true, directionSelected = false;
+
+        public static void setButtonSelected(boolean buttonSelected) {
+            Button.buttonSelected = buttonSelected;
+        }
+
+        public static void setDirectionSelected(boolean directionSelected) {
+            Button.directionSelected = directionSelected;
+        }
+
+        static boolean DEBUG_PRESS;
 
         void press(){
             pressed = true;
+            pushBits();
+            if(isSelected()) Interrupts.JOYPAD.request();
+
+//            if(A.pressed && B.pressed && START.pressed && SELECT.pressed){
+//                System.out.println("Resetting Tetris!");
+//                GameBoy.instance.debugStep = true;
+//                DEBUG_PRESS = true;
+//            }
         }
 
         void release(){
             pressed = false;
+            pushBits();
+        }
+
+        boolean isSelected(){
+            return (selectBit == 5 && buttonSelected) || (selectBit == 4 && directionSelected);
+        }
+
+        public int getKeyCode() {
+            return keyCode;
+        }
+
+        /**
+         * Set the Key code for the given button.
+         * @param keyCode use @{@link KeyEvent} codes.
+         */
+        public Button setKeyCode(int keyCode) {
+            this.keyCode = keyCode;
+            return this;
+        }
+
+        static boolean simultaneousSelect(){
+            return buttonSelected && directionSelected;
+        }
+
+        static Button getButton(int keyCode){
+            for(Button button : values()){
+                if(button.getKeyCode() == keyCode) return button;
+            }
+            return null;
         }
 
         static boolean[] getBits(){
             boolean[] bits = new boolean[8];
             bits[7] = true;
             bits[6] = true;
-            bits[currentSelectedBit] = true;
+            bits[5] = !buttonSelected;
+            bits[4] = !directionSelected;
             for(Button button : values()){
-                if(button.selectBit == currentSelectedBit){
+                if(button.isSelected()){
+                    if(!bits[button.pressedBit] && Button.simultaneousSelect()) continue;
                     bits[button.pressedBit] = !button.pressed;
                 }
             }
             return bits;
-        }
-
-        static void setCurrentSelectedBit(int bit){
-            currentSelectedBit = bit;
         }
     }
 
@@ -62,8 +110,8 @@ public class Joypad extends ByteRegister implements KeyListener {
     }
 
     public static void set(int byte_){
-        if(Utils.getBit(byte_,5) == 1) Button.setCurrentSelectedBit(5);
-        else if(Utils.getBit(byte_,4) == 1) Button.setCurrentSelectedBit(4);
+        Button.setButtonSelected(Utils.getBit(byte_,5) == 0);
+        Button.setDirectionSelected(Utils.getBit(byte_,4) == 0);
         pushBits();
     }
 
@@ -74,20 +122,23 @@ public class Joypad extends ByteRegister implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        //Not needed
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()){
-            case KeyEvent.VK_W:
-
+        Button button = Button.getButton(e.getKeyCode());
+        if(button != null){
+            button.press();
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        System.out.println("Key Released!");
+        Button button = Button.getButton(e.getKeyCode());
+        if (button != null) {
+            button.release();
+        }
     }
 
     @Override

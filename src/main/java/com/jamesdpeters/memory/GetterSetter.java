@@ -5,6 +5,7 @@ import com.jamesdpeters.Joypad;
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.registers.IE;
 import com.jamesdpeters.cpu.registers.IF;
+import com.jamesdpeters.gpu.PixelValue;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDStatus;
@@ -52,7 +53,7 @@ public class GetterSetter {
                 for(int pixel=0; pixel<8; pixel++){
                     int lsb = Utils.getBit(b1,7-pixel);
                     int msb = Utils.getBit(b2,7-pixel);
-                    Tiles.PixelValue pixelValue = Tiles.getPixelValue(lsb,msb);
+                    PixelValue pixelValue = PixelValue.getPixelValue(lsb,msb);
                     Tiles.setTilePixel(tileIndex,rowIndex,pixel,pixelValue);
                 }
                 Tile tile = Tiles.getTile(tileIndex);
@@ -79,10 +80,25 @@ public class GetterSetter {
                 System.out.println();
                 break;
 
+            case 0x46:
+                System.out.println("Writing to OAM DMA Transfer Register! "+Utils.intToString(value));
+                break;
+
             /* BGP - BG Palette Data (R/W) */
             case 0x47:
-                Tiles.setColorPalette(value);
+                PixelValue.setBackgroundPalette(value);
                 break;
+
+            /* OBP0 - Object Palette 0 Data (R/W) */
+            case 0x48:
+                PixelValue.setOBJ1Palette(value);
+                break;
+
+            /* OBP1 - Object Palette 1 Data (R/W) */
+            case 0x49:
+                PixelValue.setOBJ2Palette(value);
+                break;
+
 
             /* LCDControl (LCD Control Register) */
             case 0x40:

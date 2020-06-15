@@ -23,17 +23,17 @@ public class Monitor {
     public static ArrayList<CPUCycle> cpuCycleList = new ArrayList<>();
 
     public static void addCycle(CPUCycle cpuCycle){
-        if(!MemoryBus.isBootRomEnabled) {
-            if (GameBoy.getCpu().getRegisters().totalCycles >= START_CYCLE) {
-                cpuCycleList.add(cpuCycle);
-            }
-            if (GameBoy.getCpu().getRegisters().totalCycles > END_CYCLE) {
-                System.out.println("END OF MONITOR");
-                GameBoy.instance.running = false;
-                saveToCSV();
-                System.exit(0);
-            }
-        }
+//        if(!MemoryBus.isBootRomEnabled) {
+//            if (GameBoy.getCpu().getRegisters().totalCycles >= START_CYCLE) {
+//                cpuCycleList.add(cpuCycle);
+//            }
+//            if (GameBoy.getCpu().getRegisters().totalCycles > END_CYCLE) {
+//                System.out.println("END OF MONITOR");
+//                GameBoy.instance.running = false;
+//                saveToCSV();
+//                System.exit(0);
+//            }
+//        }
     }
 
     public static void saveToCSV(){
