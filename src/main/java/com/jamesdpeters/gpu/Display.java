@@ -125,12 +125,16 @@ public class Display extends Canvas implements Runnable {
         pixels[row*WIDTH+col] = colour;
     }
 
+    public void setRowPixels(int row, int[] pixels){
+        System.arraycopy(pixels, 0, this.pixels, row*WIDTH, pixels.length);
+    }
+
     public void setPixels(int[] pixels){
         image.setRGB(0,0, WIDTH,HEIGHT,pixels,0,WIDTH);
     }
 
     public void setTile(int rowIndex, int colIndex, Tile tile){
-        int[] pixels = tile.getRGBArray();
+        int[] pixels = tile.getRGBArray(PixelValue.Palette.BG);
         image.setRGB(colIndex*8, rowIndex*8, 8, 8, pixels, 0, 8);
     }
 

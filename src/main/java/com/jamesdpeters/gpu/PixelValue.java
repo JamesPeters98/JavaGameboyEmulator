@@ -15,24 +15,36 @@ public enum PixelValue {
         this.val = val;
     }
 
-    private Color bgColor, OBJ1, OBJ2;
-    public void setBgColor(Color bgColor){this.bgColor = bgColor;}
-    public Color getBgColor() {
-        return bgColor != null ? bgColor : WHITE;
+    public enum Palette {
+        BG,
+        OBJ1,
+        OBJ2
     }
 
-    public void setOBJ1(Color OBJ1) {
-        this.OBJ1 = OBJ1;
-    }
-    public Color getOBJ1() {
-        return OBJ1;
+    private Color bgColor = Color.WHITE, OBJ1 = Color.WHITE, OBJ2 = Color.WHITE;
+
+    public Color getColor(Palette palette){
+        switch (palette){
+            case BG: return bgColor;
+            case OBJ1: return OBJ1;
+            case OBJ2: return OBJ2;
+        }
+        //Error color
+        return Color.RED;
     }
 
-    public void setOBJ2(Color OBJ2) {
-        this.OBJ2 = OBJ2;
-    }
-    public Color getOBJ2() {
-        return OBJ2;
+    public void setColor(Palette palette, Color color){
+        switch (palette){
+            case BG:
+                bgColor = color;
+                break;
+            case OBJ1:
+                OBJ1 = color;
+                break;
+            case OBJ2:
+                OBJ2 = color;
+                break;
+        }
     }
 
     /* STATIC METHODS */
@@ -40,7 +52,7 @@ public enum PixelValue {
     /** Cache background color palette **/
     public static void setBackgroundPalette(int BGP){
         for(PixelValue value : values()){
-            value.setBgColor(getColor(getBits(BGP,value.val)));
+            value.setColor(Palette.BG,getColor(BGP,value.val));
         }
     }
 
@@ -48,7 +60,7 @@ public enum PixelValue {
     public static void setOBJ1Palette(int OBJ){
         System.out.println("Setting OBJ1: "+ Utils.intToBinaryString(OBJ));
         for(PixelValue value : values()){
-            value.setOBJ1(getColor(getBits(OBJ,value.val)));
+            value.setColor(Palette.OBJ1,getColor(OBJ,value.val));
         }
     }
 
@@ -56,8 +68,12 @@ public enum PixelValue {
     public static void setOBJ2Palette(int OBJ){
         System.out.println("Setting OBJ2: "+ Utils.intToBinaryString(OBJ));
         for(PixelValue value : values()){
-            value.setOBJ2(getColor(getBits(OBJ,value.val)));
+            value.setColor(Palette.OBJ2,getColor(OBJ,value.val));
         }
+    }
+
+    private static Color getColor(int bits, int pos){
+        return getColor(getBits(bits,pos));
     }
 
     private static Color getColor(int color){

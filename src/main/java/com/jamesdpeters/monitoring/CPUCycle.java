@@ -2,11 +2,7 @@ package com.jamesdpeters.monitoring;
 
 import com.jamesdpeters.GameBoy;
 import com.jamesdpeters.Utils;
-import com.jamesdpeters.cpu.CPU;
-import com.jamesdpeters.cpu.FlagsRegister;
-import com.jamesdpeters.cpu.InstructionBuilder;
-import com.jamesdpeters.cpu.Interrupts;
-import com.jamesdpeters.cpu.Registers;
+import com.jamesdpeters.cpu.*;
 import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
 import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
@@ -66,7 +62,6 @@ public class CPUCycle {
         Instruction instruction = InstructionBuilder.fromByteNotPrefixed(cpu,instructionByte);
         cycleAmount = instruction.run(cpu);
         instructionName = instruction.getInstructionName();
-        cpu.getRegisters().totalCycles += cycleAmount;
 
             if(instructionByte == 0xCB){
                 int instructionByteNext = MemoryBus.getByte(cpu.getRegisters().pc);
@@ -88,8 +83,16 @@ public class CPUCycle {
             }
         if(GameBoy.VERBOSE) System.out.println(" | Next Instruction: " + code + " (" + instruction.getInstructionName() + ") - CPU Cycles: " + cycleAmount);
 
+        //Tick DMA Transfer
+        DMATransfer.tick(cycleAmount);
+
         //Add total cycles from Interrupt
-        cpu.getRegisters().totalCycles += Interrupts.check(cpu);
+        int interruptCycles = Interrupts.check(cpu);
+
+        //Tick DMA again after interrupts
+        if(interruptCycles > 0) DMATransfer.tick(interruptCycles);
+
+        cpu.getRegisters().totalCycles += cycleAmount+interruptCycles;
 
         if(cpu.scheduleIME){
             cpu.scheduleIME = false;

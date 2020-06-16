@@ -32,8 +32,8 @@ public class LCDControl extends ByteRegister {
     }
 
     /** TRUE: 8x16 dots;        FALSE: 8x8 dots **/
-    public static void setObjBlockCompositionSelection(boolean objBlockCompositionSelection) {
-        instance.bits[2] = objBlockCompositionSelection;
+    public static void set8x16SpriteSize(boolean spriteSize) {
+        instance.bits[2] = spriteSize;
         instance.pushRegister();
     }
 
@@ -50,7 +50,7 @@ public class LCDControl extends ByteRegister {
     }
 
     /** TRUE: ON;               FALSE: OFF **/
-    public static void setWindowing(boolean windowing) {
+    public static void setWindowDisplayEnabled(boolean windowing) {
         instance.bits[5] = windowing;
         instance.pushRegister();
     }
@@ -73,7 +73,7 @@ public class LCDControl extends ByteRegister {
     public static boolean isObjOn() {
         return instance.bits[1];
     }
-    public static boolean isObjBlockCompositionSelection() {
+    public static boolean is8x16SpriteSize() {
         return instance.bits[2];
     }
     public static boolean isBgCodeAreaSelection() {
@@ -82,13 +82,13 @@ public class LCDControl extends ByteRegister {
     public static boolean isBgCharacterDataSelection() {
         return instance.bits[4];
     }
-    public static boolean isWINDOWING() {
+    public static boolean isWindowDisplayEnabled() {
         return instance.bits[5];
     }
     public static boolean isWindowingCodeAreaSelection() {
         return instance.bits[6];
     }
-    public static boolean isLcdControllerOperation() {
+    public static boolean isLCDDisplayEnabled() {
         return instance.bits[7];
     }
 
@@ -97,12 +97,12 @@ public class LCDControl extends ByteRegister {
         return "LCDControl{" +
                 "BG_DISPLAY=" + isBgDisplay() +
                 ", OBJ_ON=" + isObjOn() +
-                ", OBJ_BLOCK_COMPOSITION_SELECTION=" + isObjBlockCompositionSelection() +
+                ", OBJ_BLOCK_COMPOSITION_SELECTION=" + is8x16SpriteSize() +
                 ", BG_CODE_AREA_SELECTION=" + isBgCodeAreaSelection() +
                 ", BG_CHARACTER_DATA_SELECTION=" + isBgCharacterDataSelection() +
-                ", WINDOWING=" + isWINDOWING() +
+                ", WINDOWING=" + isWindowDisplayEnabled() +
                 ", WINDOWING_CODE_AREA_SELECTION=" + isWindowingCodeAreaSelection() +
-                ", LCD_CONTROLLER_OPERATION=" + isLcdControllerOperation() +
+                ", LCD_CONTROLLER_OPERATION=" + isLCDDisplayEnabled() +
                 '}';
     }
 

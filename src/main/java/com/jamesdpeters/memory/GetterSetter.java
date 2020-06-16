@@ -3,9 +3,11 @@ package com.jamesdpeters.memory;
 import com.jamesdpeters.GameBoy;
 import com.jamesdpeters.Joypad;
 import com.jamesdpeters.Utils;
+import com.jamesdpeters.cpu.DMATransfer;
 import com.jamesdpeters.cpu.registers.IE;
 import com.jamesdpeters.cpu.registers.IF;
 import com.jamesdpeters.gpu.PixelValue;
+import com.jamesdpeters.gpu.Sprite;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDStatus;
@@ -81,7 +83,8 @@ public class GetterSetter {
                 break;
 
             case 0x46:
-                System.out.println("Writing to OAM DMA Transfer Register! "+Utils.intToString(value));
+//                System.out.println("Writing to OAM DMA Transfer Register! "+Utils.intToString(value));
+                DMATransfer.start(value);
                 break;
 
             /* BGP - BG Palette Data (R/W) */
@@ -151,4 +154,12 @@ public class GetterSetter {
                 }
                 bank.setDirectByte(address,value);
             });
+
+    public static final GetterSetter SPRITE_TABLE = new GetterSetter(
+            MemoryBus.Bank::getDirectByte,
+            (bank, address, value) -> {
+                Sprite.setOAM(address,value);
+                bank.setDirectByte(address,value);
+            }
+    );
 }

@@ -42,7 +42,7 @@ public class GPU {
             syncClockSpeed();
             isWaitingForFrame = false;
         }
-        if(!LCDControl.isLcdControllerOperation()){
+        if(!LCDControl.isLCDDisplayEnabled()){
             LCDValues.setLineY(0);
             lastFrameTime = System.nanoTime();
             isWaitingForFrame = true;
@@ -100,37 +100,72 @@ public class GPU {
                 System.exit(-1);
 
         }
+
+        LCDStatus.setCoincidenceFlag(LCDValues.getLineYCompare() == LCDValues.getLineY());
     }
 
+    private PixelValue[] pixelRow = new PixelValue[160];
     private void renderScan(){
-        //Which section of VRAM to use.
-        int bgOffset = LCDControl.isBgCodeAreaSelection() ? 0x9C00 : 0x9800;
 
-        int bgX = LCDValues.getScrollX() / 0x08;
-        int bgY = (LCDValues.getScrollY() + LCDValues.getLineY()) % 0x100;
-        int mapAddress = bgOffset + (bgY / 0x08) * 0x20;
+        if(LCDControl.isBgDisplay()) {
+            //Which section of VRAM to use.
+            int bgOffset = LCDControl.isBgCodeAreaSelection() ? 0x9C00 : 0x9800;
 
-        int tile = MemoryBus.getByte(mapAddress+bgX);
-        int line = bgY % 0x08;
+            int bgX = LCDValues.getScrollX() / 0x08;
+            int bgY = (LCDValues.getScrollY() + LCDValues.getLineY()) % 0x100;
+            int mapAddress = bgOffset + (bgY / 0x08) * 0x20;
 
-        boolean isTileIDSigned = LCDControl.isBgCharacterDataSelection();
-        if(!isTileIDSigned) tile += 256;
+            int tile = MemoryBus.getByte(mapAddress + bgX);
+            int line = bgY % 0x08;
 
-        int x = LCDValues.getScrollX() & 7;
+            boolean isTileIDSigned = LCDControl.isBgCharacterDataSelection();
+            if (!isTileIDSigned) tile += 256;
 
-        for(int i=0; i < 160; i++){
-            PixelValue pixelValue = Tiles.getTilePixel(tile,line,x);
-            if(pixelValue == null) { pixelValue = PixelValue.ZERO; }
-            display.setPixel(LCDValues.getLineY(), i, pixelValue.getBgColor().getRGB());
+            int x = LCDValues.getScrollX() & 7;
 
-            x++;
-            if(x == 8){
-                x=0;
-                bgX = (bgX + 1) & 0x1F;
-                int adr = mapAddress + bgX;
-                tile = MemoryBus.getByte(adr);
+            for (int i = 0; i < 160; i++) {
+                PixelValue pixelValue = Tiles.getTilePixel(tile, line, x);
+                if (pixelValue == null) {
+                    pixelValue = PixelValue.ZERO;
+                }
+
+                pixelRow[i] = pixelValue;
+                display.setPixel(LCDValues.getLineY(), i, pixelValue.getColor(PixelValue.Palette.BG).getRGB());
+
+                x++;
+                if (x == 8) {
+                    x = 0;
+                    bgX = (bgX + 1) & 0x1F;
+                    int adr = mapAddress + bgX;
+                    tile = MemoryBus.getByte(adr);
 
 //                if(LCDControl.isBgCharacterDataSelection() && tile < 0x80) tile += 0x100;
+                }
+            }
+        }
+
+        if(LCDControl.isObjOn()){
+            for(int i=0; i<40; i++){
+                Sprite sprite = Sprite.getSprite(i);
+                if(sprite == null) continue;
+
+                if(sprite.isSpriteInCurrentRenderScan()){
+
+                    //This is automatically flipped by sprite class.
+                    PixelValue[] row = sprite.getSpritePixelRow();
+
+                    for(int x=0; x<8; x++){
+                        //Check if current pixel should be drawn.
+                        if(sprite.isSpritePixelOnScreen(x) &&
+                                (row[x] != PixelValue.ZERO) &&
+                                (sprite.getOBJtoBGPriority() || (pixelRow[sprite.getXPosition()+x] == PixelValue.ZERO))){
+
+                            display.setPixel(LCDValues.getLineY(), sprite.getXPosition()+x, row[x].getColor(sprite.getPalette()).getRGB());
+
+                        }
+                    }
+                }
+
             }
         }
     }

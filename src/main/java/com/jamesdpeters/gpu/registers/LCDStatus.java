@@ -109,6 +109,10 @@ public class LCDStatus extends ByteRegister {
         instance.bits[1] = left;
     }
 
+    public static void setCoincidenceFlag(boolean bool){
+        instance.bits[2] = bool;
+    }
+
     @Override
     public String toString() {
         return "LCDStatus{" +

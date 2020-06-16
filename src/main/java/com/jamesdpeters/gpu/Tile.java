@@ -24,13 +24,17 @@ public class Tile {
         return PixelValue.ZERO;
     }
 
-    public int[] getRGBArray(){
+    public PixelValue[] getTileRow(int rowIndex){
+        return pixels[rowIndex];
+    }
+
+    public int[] getRGBArray(PixelValue.Palette palette){
         int[] array = new int[getCols()*getRows()];
         int index = 0;
         for(PixelValue[] row : pixels){
             for(PixelValue pixel : row){
-                if(pixel == null) array[index] = PixelValue.ZERO.getBgColor().getRGB();
-                else array[index] = pixel.getBgColor().getRGB();
+                if(pixel == null) array[index] = PixelValue.ZERO.getColor(palette).getRGB();
+                else array[index] = pixel.getColor(palette).getRGB();
                 index++;
             }
         }

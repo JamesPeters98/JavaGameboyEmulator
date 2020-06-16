@@ -24,6 +24,7 @@ public class GameBoy implements Runnable {
     private Display display;
 
     public Display backgroundMap;
+//    public Display spriteMap;
 
     public static GameBoy instance;
     private long startTime;
