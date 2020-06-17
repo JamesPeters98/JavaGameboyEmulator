@@ -3,10 +3,19 @@ package com.jamesdpeters.gpu;
 import com.jamesdpeters.Utils;
 import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDValues;
+import com.jamesdpeters.monitoring.SpriteWindow;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 
 public class Sprite {
 
     private static Sprite[] sprites = new Sprite[40];
+
+    public static Sprite[] getSprites() {
+        return sprites;
+    }
 
     /**
      * Set a specific byte in OAM.
@@ -20,9 +29,26 @@ public class Sprite {
             sprite = new Sprite();
             sprite.OAMIndex = index;
             sprites[index] = sprite;
+
+//            SpriteWindow.listView.refresh();
+            Platform.runLater(() -> {
+                SpriteWindow.data.clear();
+                SpriteWindow.data.addAll(sprites);
+            });
         }
         int bytePos = address % 4;
-        sprite.bytes[bytePos] = b & 0xFF;
+
+        int oldByte = sprite.bytes[bytePos];
+        //Don't change byte if it's the same.
+        if(oldByte == b){
+            return;
+        }
+//        System.out.println("Previous Sprite: "+sprite);
+        sprite.bytes[bytePos] = b;
+        SpriteWindow.listView.refresh();
+//        System.out.println("     New Sprite: "+sprite);
+
+
 //        System.out.println(sprite);
     }
 
@@ -69,6 +95,11 @@ public class Sprite {
         return bytes[3];
     }
 
+    /**
+     * True = OBJ Behind BG.
+     * False = OBJ above BG.
+     * @return
+     */
     public boolean getOBJtoBGPriority(){
         return Utils.getBit(getAttributes(),7) == 1;
     }
@@ -117,8 +148,11 @@ public class Sprite {
      * @param x - pixel row offset.
      */
     public boolean isSpritePixelOnScreen(int x){
-        return (getXPosition()+x) >= 0
+        boolean bool = (getXPosition()+x) >= 0
                 && (getXPosition()+x) < 160;
+//        if(bool) System.out.println("Sprite: "+getIndex()+" pixel: "+x+" is on screen!");
+
+        return bool;
     }
 
 //    public boolean isPixelRowTransparent(boolean yFlip){
@@ -128,6 +162,7 @@ public class Sprite {
 
     @Override
     public String toString() {
-        return "Sprite[Index: "+getIndex()+" Y: "+getYPosition()+" X: "+getXPosition()+" Tile Number: "+getTileNumber()+"]";
+        return "Sprite[Index="+getIndex()+" Y="+getYPosition()+" X="+getXPosition()+" Tile Number="+getTileNumber()+"]";
     }
+
 }

@@ -3,6 +3,7 @@ package com.jamesdpeters.gpu;
 import com.jamesdpeters.Utils;
 
 import java.awt.*;
+import java.util.Arrays;
 
 public enum PixelValue {
     ZERO(0), //00

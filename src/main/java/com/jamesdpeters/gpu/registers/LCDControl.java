@@ -1,5 +1,6 @@
 package com.jamesdpeters.gpu.registers;
 
+import com.jamesdpeters.Utils;
 import com.jamesdpeters.registers.ByteRegister;
 
 public class LCDControl extends ByteRegister {
@@ -9,8 +10,10 @@ public class LCDControl extends ByteRegister {
     public static void set(int b){
         instance.setByte(b);
 //        System.out.println();
-//        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
-//        System.out.println(instance);
+        System.out.println("LY: "+LCDValues.getLineY());
+        System.out.println("Set LCDControl: "+ Utils.intToBinaryString(b));
+        System.out.println(instance);
+        System.out.println();
 //        Utils.waitForInput();
     }
 

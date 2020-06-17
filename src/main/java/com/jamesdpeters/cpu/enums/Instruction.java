@@ -4,6 +4,7 @@ import com.jamesdpeters.Utils;
 import com.jamesdpeters.cpu.CPU;
 import com.jamesdpeters.cpu.FlagsRegister;
 import com.jamesdpeters.memory.MemoryBus;
+import com.jamesdpeters.monitoring.CPUCycle;
 
 public enum Instruction {
 
@@ -32,6 +33,38 @@ public enum Instruction {
         instruction.setInstructionName("EI");
         cpu.scheduleIME = true;
         cpu.getRegisters().pc++;
+        return CPU.CPUCYCLE_1;
+    }),
+
+    DAA((cpu, instruction) -> {
+        int result = RegisterBank.A.getValue(cpu);
+        FlagsRegister flags = cpu.getRegisters().getF();
+
+        if(flags.SUBTRACT){
+            if(flags.HALF_CARRY){
+                result = (result - 6) & 0xFF;
+            }
+            if(flags.CARRY){
+                result = (result - 0x60) & 0xFF;
+            }
+        } else {
+            if(flags.HALF_CARRY || (result & 0xf) > 9){
+                result += 0x06;
+            }
+            if(flags.CARRY || result > 0x9f){
+                result += 0x60;
+            }
+        }
+
+        flags.HALF_CARRY = false;
+        if(result > 0xff){
+            flags.CARRY = true;
+        }
+        result &= 0xff;
+        flags.ZERO = result == 0;
+
+        RegisterBank.A.setValue(cpu,result);
+
         return CPU.CPUCYCLE_1;
     }),
 

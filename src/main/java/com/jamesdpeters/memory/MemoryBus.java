@@ -14,6 +14,7 @@ public class MemoryBus {
     public enum Bank {
         BOOT_ROM(0x00,0xFF,GetterSetter.DEFAULT,true),
         ROM(0x00, 0x7FFF,GetterSetter.DEFAULT,true),
+        CARTRIDGE_RAM(0xA000, 0xBFFF),
         WORKING_RAM(0xC000, 0xDFFF),
         VRAM(0x8000,0x97FF, GetterSetter.VRAM,false),
         BACKGROUND_MAP(0x9800, 0x9FFF),

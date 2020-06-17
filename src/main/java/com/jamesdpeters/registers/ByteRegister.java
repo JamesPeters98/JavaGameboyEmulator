@@ -26,7 +26,7 @@ public abstract class ByteRegister {
         for(int b=0; b<8; b++){
             byte_ = Utils.setBit(byte_,b,bits[b]);
         }
-        MemoryBus.writeByte(getAddress(),byte_);
+        MemoryBus.writeByteDuringDMA(getAddress(),byte_);
     }
 
     @Override

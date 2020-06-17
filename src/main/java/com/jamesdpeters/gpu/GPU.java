@@ -60,6 +60,7 @@ public class GPU {
                 if(frameClock >= TRANSFER_FRAME_TIME){
                     frameClock -= TRANSFER_FRAME_TIME;
                     LCDStatus.setMode(LCDStatus.Mode.HORIZONTAL_BLANK_PERIOD_0);
+//                    if(LCDStatus.getHBlankIterrupt()) Interrupts.LCD_STAT.request();
                     renderScan();
                 }
                 break;
@@ -101,12 +102,14 @@ public class GPU {
 
         }
 
-        LCDStatus.setCoincidenceFlag(LCDValues.getLineYCompare() == LCDValues.getLineY());
+        if((LCDValues.getLineYCompare() == LCDValues.getLineY())) LCDStatus.doInterrupt(LCDStatus.getCoincidenceInterrupt());
+//        LCDStatus.setCoincidenceFlag(LCDValues.getLineYCompare() == LCDValues.getLineY());
     }
 
     private PixelValue[] pixelRow = new PixelValue[160];
     private void renderScan(){
 
+        //Is the background on/off (bit = 0 if
         if(LCDControl.isBgDisplay()) {
             //Which section of VRAM to use.
             int bgOffset = LCDControl.isBgCodeAreaSelection() ? 0x9C00 : 0x9800;
@@ -115,7 +118,7 @@ public class GPU {
             int bgY = (LCDValues.getScrollY() + LCDValues.getLineY()) % 0x100;
             int mapAddress = bgOffset + (bgY / 0x08) * 0x20;
 
-            int tile = MemoryBus.getByte(mapAddress + bgX);
+            int tile = MemoryBus.getByteDuringDMA(mapAddress + bgX);
             int line = bgY % 0x08;
 
             boolean isTileIDSigned = LCDControl.isBgCharacterDataSelection();
@@ -137,10 +140,15 @@ public class GPU {
                     x = 0;
                     bgX = (bgX + 1) & 0x1F;
                     int adr = mapAddress + bgX;
-                    tile = MemoryBus.getByte(adr);
+                    tile = MemoryBus.getByteDuringDMA(adr);
 
 //                if(LCDControl.isBgCharacterDataSelection() && tile < 0x80) tile += 0x100;
                 }
+            }
+        } else {
+            //If background is turned off, the row is set to the ZERO value from the BGP.
+            for(int i=0; i<160; i++){
+                display.setPixel(LCDValues.getLineY(), i, PixelValue.ZERO.getColor(PixelValue.Palette.BG).getRGB());
             }
         }
 
@@ -156,12 +164,16 @@ public class GPU {
 
                     for(int x=0; x<8; x++){
                         //Check if current pixel should be drawn.
-                        if(sprite.isSpritePixelOnScreen(x) &&
-                                (row[x] != PixelValue.ZERO) &&
-                                (sprite.getOBJtoBGPriority() || (pixelRow[sprite.getXPosition()+x] == PixelValue.ZERO))){
-
-                            display.setPixel(LCDValues.getLineY(), sprite.getXPosition()+x, row[x].getColor(sprite.getPalette()).getRGB());
-
+                        if(sprite.isSpritePixelOnScreen(x)){
+//                            System.out.println("Sprite: "+sprite.getIndex()+" on screen");
+                            if(row[x] != PixelValue.ZERO){
+//                                System.out.println("Sprite: "+sprite.getIndex()+" pixel is not transparent");
+                                if(!sprite.getOBJtoBGPriority() || (pixelRow[sprite.getXPosition()+x] == PixelValue.ZERO)){
+//                                    System.out.println("Sprite: "+sprite.getIndex()+" has priority");
+                                    int pixel = sprite.isXFlipped() ? 7-x : x;
+                                    display.setPixel(LCDValues.getLineY(), sprite.getXPosition() + x, row[pixel].getColor(sprite.getPalette()).getRGB());
+                                }
+                            }
                         }
                     }
                 }

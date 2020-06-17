@@ -5,9 +5,12 @@ import com.jamesdpeters.gpu.Display;
 import com.jamesdpeters.gpu.GPU;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.Tiles;
+import com.jamesdpeters.gpu.registers.LCDControl;
 import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.memory.MemoryBus;
 import com.jamesdpeters.monitoring.Monitor;
+import com.jamesdpeters.monitoring.SpriteWindow;
+import javafx.application.Application;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,23 +27,25 @@ public class GameBoy implements Runnable {
     private Display display;
 
     public Display backgroundMap;
+    public SpriteWindow spriteViewer;
 //    public Display spriteMap;
 
     public static GameBoy instance;
     private long startTime;
-    public boolean debugStep = false;
+    public boolean debugStep = true;
 
     public GameBoy(){
         cpu = new CPU();
         cpu.getRegisters().totalCycles += 4;
         Joypad.init();
-        display = new Display(cpu);
 
         backgroundMap = Display.BACKGROUND_TILE_DISPLAY();
         backgroundMap.setTitle("Background Map");
 
-        gpu = new GPU(display,false);
+        display = new Display(cpu);
 
+        spriteViewer = new SpriteWindow();
+        gpu = new GPU(display,true);
         thread = new Thread(this);
     }
 
@@ -51,19 +56,18 @@ public class GameBoy implements Runnable {
 
     @Override
     public void run() {
-//        Utils.waitForInput();
+        spriteViewer.open();
         startTime = System.nanoTime();
         while(running){
 
 
-            if(debugStep) {
-                System.out.println("DEBUG MODE!");
-                VERBOSE = true;
-                debugStep = true;
-                Utils.waitForInput();
-                System.out.println(cpu.getRegisters());
-                System.out.println(LCDValues.getString());
-            }
+//            if(debugStep && !MemoryBus.isBootRomEnabled) {
+//                VERBOSE = true;
+//                debugStep = true;
+//                Utils.waitForInput();
+//                System.out.println(cpu.getRegisters());
+////                System.out.println(LCDControl.getString());
+//            }
 
 //            if(!MemoryBus.isBootRomEnabled){
 //                VERBOSE = true;

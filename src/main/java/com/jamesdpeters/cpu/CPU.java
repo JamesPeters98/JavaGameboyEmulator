@@ -41,7 +41,7 @@ public class CPU {
 
     public CPU(){
         registers = new Registers();
-        cart = new Cart("tetris.gb");
+        cart = new Cart("dmg-acid2.gb");
 //        cart = new Cart();
         MemoryBus.setROM(cart.rom);
         MemoryBus.setBootROM(BootRom.GAMEBOY_CLASSIC_CHECKSUM);
@@ -54,7 +54,20 @@ public class CPU {
     }
 
     public int step(){
-        if(state == State.HALT) return 0;
+        if(state == State.HALT){
+            try {
+                int interrupt = Interrupts.check(this);
+                if(interrupt != 0){
+                    state = State.RUNNING;
+                    return interrupt;
+                }
+            } catch (UnknownInstructionException | UnknownPrefixInstructionException e) {
+                System.out.println();
+                e.printStackTrace();
+                System.exit(-1);
+            }
+            return CPUCYCLE_1;
+        }
         if(state == State.RUNNING) {
             try {
                 CPUCycle cycle = new CPUCycle(this);

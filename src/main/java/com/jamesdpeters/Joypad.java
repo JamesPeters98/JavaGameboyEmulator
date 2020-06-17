@@ -14,11 +14,11 @@ public class Joypad extends ByteRegister implements KeyListener {
     public enum Button {
         START(5,3, KeyEvent.VK_SHIFT),
         SELECT(5, 2, KeyEvent.VK_CONTROL),
-        A(5, 1, KeyEvent.VK_ENTER),
-        B(5,0, KeyEvent.VK_DECIMAL),
+        B(5,1, KeyEvent.VK_DECIMAL),
+        A(5, 0, KeyEvent.VK_ENTER),
 
-        UP(4,3, KeyEvent.VK_UP),
-        DOWN(4,2, KeyEvent.VK_DOWN),
+        DOWN(4,3, KeyEvent.VK_DOWN),
+        UP(4,2, KeyEvent.VK_UP),
         LEFT(4,1, KeyEvent.VK_LEFT),
         RIGHT(4,0, KeyEvent.VK_RIGHT);
 

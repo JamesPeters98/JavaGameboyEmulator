@@ -58,13 +58,13 @@ public class CPUCycle {
     }
 
     public int run() throws UnknownInstructionException, UnknownPrefixInstructionException {
-        int instructionByte = MemoryBus.getByte(cpu.getRegisters().pc);
+        int instructionByte = MemoryBus.getByteDuringDMA(cpu.getRegisters().pc);
         Instruction instruction = InstructionBuilder.fromByteNotPrefixed(cpu,instructionByte);
         cycleAmount = instruction.run(cpu);
         instructionName = instruction.getInstructionName();
 
             if(instructionByte == 0xCB){
-                int instructionByteNext = MemoryBus.getByte(cpu.getRegisters().pc);
+                int instructionByteNext = MemoryBus.getByteDuringDMA(cpu.getRegisters().pc);
                 if(cpu.testedPrefixCodes.contains(instructionByte)){
                     cpu.haveTested = true;
                 } else {
@@ -105,7 +105,6 @@ public class CPUCycle {
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-
 
         return cycleAmount;
     }

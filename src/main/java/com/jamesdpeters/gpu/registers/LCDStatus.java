@@ -1,5 +1,6 @@
 package com.jamesdpeters.gpu.registers;
 
+import com.jamesdpeters.cpu.Interrupts;
 import com.jamesdpeters.registers.ByteRegister;
 
 import java.util.Arrays;
@@ -35,6 +36,20 @@ public class LCDStatus extends ByteRegister {
     }
 
     private static LCDStatus instance = new LCDStatus();
+
+    private boolean wasCurrentCycle = false;
+    private boolean wasPreviousCycleInterrupt = false;
+
+    public static void resetInterrupts(){
+        if(instance.wasCurrentCycle){
+            instance.wasCurrentCycle = false;
+            instance.wasPreviousCycleInterrupt = true;
+            return;
+        }
+        if(instance.wasPreviousCycleInterrupt){
+            instance.wasPreviousCycleInterrupt = false;
+        }
+    }
 
     public static void set(int b){
         instance.setByte(b);
@@ -89,12 +104,15 @@ public class LCDStatus extends ByteRegister {
     public static void setMode(Mode Mode) {
         switch (Mode){
             case HORIZONTAL_BLANK_PERIOD_0:
+                doInterrupt(getHBlankIterrupt());
                 setModeBits(false,false);
                 break;
             case VERTICAL_BLANKING_PERIOD_1:
+                doInterrupt(getVBlankIterrupt());
                 setModeBits(false,true);
                 break;
             case SEARCHING_OAM_RAM_2:
+                doInterrupt(getOAMInterrupt());
                 setModeBits(true,false);
                 break;
             case TRANSFERRING_DATA_TO_LCD_3:
@@ -102,6 +120,13 @@ public class LCDStatus extends ByteRegister {
                 break;
         }
         instance.pushRegister();
+    }
+
+    public static void doInterrupt(boolean enabled){
+        if(!instance.wasPreviousCycleInterrupt && !instance.wasCurrentCycle && enabled){
+            instance.wasCurrentCycle = true;
+            Interrupts.LCD_STAT.request();
+        }
     }
 
     private static void setModeBits(boolean left, boolean right){

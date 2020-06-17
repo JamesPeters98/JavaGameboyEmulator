@@ -20,6 +20,7 @@ public class InstructionBuilder {
         if(b == 0xfb) return Instruction.EI;
         if(b == 0x2f) return Instruction.CPL;
         if(b == 0xe9) return Instruction.JP_HL;
+        if(b == 0x27) return Instruction.DAA;
 
         //OPERATIONS AND BITWISE
         if(inHorizontalRange(b,  0x80,  0x87)) return horizontalLoadType(Instruction.ADD,  0x80, b, RegisterBank.A);
