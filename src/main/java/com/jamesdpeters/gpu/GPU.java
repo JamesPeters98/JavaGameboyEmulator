@@ -102,7 +102,12 @@ public class GPU {
 
         }
 
-        if((LCDValues.getLineYCompare() == LCDValues.getLineY())) LCDStatus.doInterrupt(LCDStatus.getCoincidenceInterrupt());
+        if((LCDValues.getLineYCompare() == LCDValues.getLineY())){
+            LCDStatus.setCoincidenceFlag(true);
+            LCDStatus.doInterrupt(LCDStatus.getCoincidenceInterrupt());
+        } else {
+            LCDStatus.setCoincidenceFlag(false);
+        }
 //        LCDStatus.setCoincidenceFlag(LCDValues.getLineYCompare() == LCDValues.getLineY());
     }
 
@@ -156,7 +161,6 @@ public class GPU {
             for(int i=0; i<40; i++){
                 Sprite sprite = Sprite.getSprite(i);
                 if(sprite == null) continue;
-
                 if(sprite.isSpriteInCurrentRenderScan()){
 
                     //This is automatically flipped by sprite class.
