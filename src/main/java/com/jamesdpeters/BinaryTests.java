@@ -8,13 +8,16 @@ public class BinaryTests {
 //        int result = getBits(b,-1);
 //
 //        System.out.println(Integer.toBinaryString(result));
-        int val = 0xf1;
+        int val = 5;
 
-        int adr = val * 0x100;
-        int dest = adr + 0xFE00;
+        int upper = getUpperTileNumber(val);
+        int lower = getLowerTileNumber(val);
 
-        System.out.println(Utils.intToString(adr));
-        System.out.println(Utils.intToString(dest));
+        System.out.println(Utils.intToBinaryString(upper));
+        System.out.println(Utils.intToBinaryString(lower));
+
+        System.out.println((upper));
+        System.out.println((lower));
     }
 
     public static int setBit(int byte_, int position, boolean bool){
@@ -28,6 +31,14 @@ public class BinaryTests {
      **/
     private static int getBits(int value, int pos){
         return (((1 << 2) - 1) & (value >> (2*pos)));
+    }
+
+    public static int getUpperTileNumber(int b){
+        return b & 0xFE;
+    }
+
+    public static int getLowerTileNumber(int b){
+        return b | 0x01;
     }
 
 }

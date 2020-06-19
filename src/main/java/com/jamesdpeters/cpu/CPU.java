@@ -7,6 +7,7 @@ import com.jamesdpeters.cartridge.Cart;
 import com.jamesdpeters.cpu.enums.Instruction;
 import com.jamesdpeters.exceptions.UnknownInstructionException;
 import com.jamesdpeters.exceptions.UnknownPrefixInstructionException;
+import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.memory.MemoryBus;
 import com.jamesdpeters.monitoring.CPUCycle;
 import com.jamesdpeters.monitoring.Monitor;

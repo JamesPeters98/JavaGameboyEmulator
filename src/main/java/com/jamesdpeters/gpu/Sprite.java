@@ -91,6 +91,15 @@ public class Sprite {
         return bytes[2];
     }
 
+
+    public int getUpperTileNumber(){
+        return getTileNumber() & 0xFE;
+    }
+
+    public int getLowerTileNumber(){
+        return getTileNumber() | 0x01;
+    }
+
     public int getAttributes(){
         return bytes[3];
     }
@@ -129,6 +138,35 @@ public class Sprite {
         return Tiles.getTile(getTileNumber());
     }
 
+    public Tile getUpperTile(){
+        return Tiles.getTile(getUpperTileNumber());
+    }
+
+    public Tile getLowerTile(){
+        return Tiles.getTile(getLowerTileNumber());
+    }
+
+    public Tile getTile(int index){
+//        if(LCDControl.is8x16SpriteSize()) {
+//            if (index < 8) {
+//                return Tiles.getTile(getLowerTileNumber());
+//            }
+//            return Tiles.getTile(getUpperTileNumber());
+//        }
+        return Tiles.getTile(index);
+    }
+
+    /**
+     * Get the pixel row for the provided index - Takes into account 8x16 Sprites.
+     * @param index
+     * @return
+     */
+    private PixelValue[] getPixelRow(int index){
+        Tile tile = getTile(index);
+        int rowIndex = index > 7 ? index-8 : index;
+        return tile.getTileRow(rowIndex);
+    }
+
     public boolean isSpriteInCurrentRenderScan(){
         return (getYPosition() <= LCDValues.getLineY()) && (getYPosition()+getSpriteHeight() > LCDValues.getLineY());
     }
@@ -139,8 +177,9 @@ public class Sprite {
 
     public PixelValue[] getSpritePixelRow(){
         int pos = (LCDValues.getLineY()-getYPosition());
-        int index = isYFlipped() ? (7-pos) : pos;
-        return getTile().getTileRow(index);
+        int index = isYFlipped() ? ((getSpriteHeight()-1)-pos) : pos;
+        System.out.println(index);
+        return getPixelRow(index);
     }
 
     /**

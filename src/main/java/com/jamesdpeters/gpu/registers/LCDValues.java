@@ -21,7 +21,6 @@ public class LCDValues {
     }
 
 
-
     public static void setScrollY(int value){
         MemoryBus.writeByteDuringDMA(0xFF42, value & 0xFF);
     }
@@ -35,7 +34,7 @@ public class LCDValues {
     }
 
     public static void setLineYCompare(int value){
-        MemoryBus.writeByteDuringDMA(0xFF42, value & 0xFF);
+        MemoryBus.writeByteDuringDMA(0xFF45, value & 0xFF);
     }
 
 

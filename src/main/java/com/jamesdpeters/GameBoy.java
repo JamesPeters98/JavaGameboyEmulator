@@ -6,6 +6,7 @@ import com.jamesdpeters.gpu.GPU;
 import com.jamesdpeters.gpu.Tile;
 import com.jamesdpeters.gpu.Tiles;
 import com.jamesdpeters.gpu.registers.LCDControl;
+import com.jamesdpeters.gpu.registers.LCDStatus;
 import com.jamesdpeters.gpu.registers.LCDValues;
 import com.jamesdpeters.memory.MemoryBus;
 import com.jamesdpeters.monitoring.Monitor;
@@ -82,6 +83,9 @@ public class GameBoy implements Runnable {
 
             int cycle = cpu.step();
             gpu.step(cycle);
+
+            LCDStatus.resetInterrupts();
+
 
 //            if(!MemoryBus.isBootRomEnabled) {
 //                VERBOSE = true;

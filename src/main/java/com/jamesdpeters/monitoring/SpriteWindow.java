@@ -61,7 +61,9 @@ public class SpriteWindow extends Application implements Runnable {
                         BufferedImage imageScaled = Scalr.resize(image,Scalr.Method.SPEED, 40, 40);
                         imageView.setImage(SwingFXUtils.toFXImage(imageScaled, null));
 
-                        setText("X: "+item.getXPosition()+" Y: "+item.getYPosition()+" \n"+
+                        String text = String.format("X: %-3d Y: %-3d  Y-Flip: %-3b", item.getXPosition(), item.getYPosition(), item.isYFlipped());
+
+                        setText(text+" \n"+
                                 "Index: "+item.getIndex());
                     } else {
                         imageView.setImage(nintendoLogo);
